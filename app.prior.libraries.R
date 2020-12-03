@@ -1,5 +1,5 @@
-options(repos = BiocManager::repositories())
-getOption("repos")
+#options(repos = BiocManager::repositories())
+#getOption("repos")
 
 requiredLib <- c(
   "shiny",
@@ -27,8 +27,8 @@ requiredLib <- c(
   "factoextra", #VM for PCA
   "FactoMineR", #VM for PCA
   "jsonlite", #API
-  "httr"#, #API
-  #"Seurat" #Single-cell
+  "httr", #API
+  "Seurat" #Single-cell
 ) 
 for (lib in requiredLib) {
   #if (!require(lib, character.only = TRUE)) {
