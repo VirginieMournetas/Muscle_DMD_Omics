@@ -1,0 +1,8 @@
+"Days"	"Mean"	"SEM"	"pvalue"	"Adjusted.pvalue"	"Significant"
+"1"	"D03/D0"	0	0	0	0	0
+"2"	"D10/D03"	0	0	0	0	0
+"3"	"D17/D10"	0	0	0	0	0
+"4"	"D25/D17"	0	0	0	0	0
+"5"	"MyoT/MyoB"	0	0	0	0	0
+"6"	"MyoB/D17"	0	0	0	0	0
+"7"	"MyoT/D25"	0	0	0	0	0

@@ -1,0 +1,112 @@
+#rm(list =ls())
+#setwd("/home/virginie/shared/Muscle_DMD_Omics")
+
+Last_Update <- "03/12/20"
+
+
+#### FOLDERS #### 
+source("app.prior.folders.R", local = TRUE, encoding = "UTF-8") #/home/virginie/shared/Muscle_DMD_Omics/
+
+####LIBRARIES####
+source(file.path(dir["base"], "app.prior.libraries.R"), local = TRUE, encoding = "UTF-8")
+
+#### DATA ####
+source(file.path(dir["base"], "app.prior.data.R"), local = TRUE, encoding = "UTF-8")
+
+#### FUNCTIONS ####
+source(file.path(dir["base"], "app.prior.functions.R"), local = TRUE, encoding = "UTF-8")
+
+####server####
+server <- function(input , output, session) {
+  
+  source(file.path(dir["base"], "app.server.Data_homemade.R"), local = TRUE, encoding = "UTF-8")
+  source(file.path(dir["base"], "app.server.Exp.R"), local = TRUE, encoding = "UTF-8")
+  source(file.path(dir["base"], "app.server.Exp_homemade.R"), local = TRUE, encoding = "UTF-8")  
+  
+}
+
+####ui####
+ui <- dashboardPagePlus(skin = "black" ,
+                        
+                        # Header ####
+                        header <- dashboardHeaderPlus(
+                          title =tagList(span(class = "logo-lg", "Muscle-DMD-Omics"), tags$img(src = Logo , style="height:40%; width:160%"))) ,
+                        
+                        # Sidebar ####
+                        sidebar <- dashboardSidebar(
+                          #width = 250 , 
+                          sidebarMenu(
+                            menuItem("Home" , tabName = "Home" , icon = icon("home")) , 
+                            menuItem("Data presentation" , tabName = "Data" , icon = icon("microscope")),
+                            menuItem("Expression data" , tabName = "Exp" , icon = icon("chart-bar")),
+                            menuItem("References" , tabName = "Ref" , icon = icon("atlas")), 
+                            menuItem("Contact" , tabName = "Contact" , icon = icon("marker"))
+                          )
+                        ),
+                        
+                        # Body ####
+                        body <- dashboardBody(
+                          
+                          tags$head(tags$style(HTML(".main-sidebar { font-size: 17px; }"))) , #change the font size to 20
+
+                          tabItems(
+                            
+                            # Tab.Home ####
+                            tabItem(tabName = "Home", 
+                                    p()),
+                            
+                            # Tab.Data ####
+                            tabItem(tabName = "Data", 
+                                    boxPlus( title = p(icon("flask") , tags$b("A brief overview of the differentiation protocol")),
+                                             closable = FALSE , 
+                                             collapsible = TRUE , 
+                                             collapsed = FALSE ,
+                                             status = "primary" , solidHeader = TRUE , width = 12 ,
+                                             p(tags$img(src = img_exp , style = "height:70% ; width:70% ; text-align:center") , style = "text-align:center")),
+                                    
+                                    boxPlus( title = p(icon("table") , tags$b("The list of available samples")),
+                                             closable = FALSE , 
+                                             collapsible = TRUE , 
+                                             collapsed = FALSE ,
+                                             status = "primary" , solidHeader = TRUE , width = 12 ,
+                                             DT::dataTableOutput("Exp_mRNA")
+                                    )),
+                            
+                            # Tab.Exp ####
+                            tabItem(tabName = "Exp", 
+                                    tabBox(
+                                      title = "" , width = 12 , 
+                                      id = "tabset_Exp" , # The id lets us use input$tabset1 on the server to find the current tab
+                                      side = "left" , 
+                                      tabPanel(p(icon("cloud-download-alt") , tags$b("Raw data"), style = "color:#367FA9"), source(file.path(dir["base"], "app.ui.Exp1.R"), local = TRUE)$value),
+                                      tabPanel(p(icon("table") , tags$b("Entire datasets") , style = "color:#367FA9"), source(file.path(dir["base"], "app.ui.Exp2.R"), local = TRUE)$value),      
+                                      tabPanel(p(icon("chart-bar") , tags$b("Single-gene expression data") , style = "color:#367FA9"), source(file.path(dir["base"], "app.ui.Exp3.R"), local = TRUE)$value),     
+                                      tabPanel(p(icon("question-circle") , tags$b("Help") , style = "color:#367FA9") , source(file.path(dir["base"], "app.ui.Data_Help.R"), local = TRUE)$value))),
+                            
+                            
+                            # Tab.Ref ####
+                            tabItem(tabName = "Ref",
+                                    p(source(file.path(dir["base"],"app.ui.Ref.01.R"), local = TRUE)$value,
+                                      source(file.path(dir["base"],"app.ui.Ref.02.R"), local = TRUE)$value)), 
+                            
+                            # Tab.Contact ####
+                            tabItem(tabName = "Contact",
+                                    source(file.path(dir["base"], "app.ui.Contact.R"), local = TRUE)$value,
+                                    )
+                            
+                            
+                            #### ####
+
+                          ),
+                          
+                          #Bottom logo####
+                          div(
+                            p(tags$img(src = logo_bottom , style="height:70%; width:70%"), style = "text-align:center"),
+                            p("Last update: ",tags$b(Last_Update), tags$i(" by Virginie Mournetas") , style = "text-align:center")
+                          )
+                        )
+)
+
+####APP####
+shinyApp(ui, server)
+

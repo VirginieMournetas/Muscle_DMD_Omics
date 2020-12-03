@@ -1,0 +1,39 @@
+options(repos = BiocManager::repositories())
+getOption("repos")
+
+requiredLib <- c(
+  "shiny",
+  #"BiocManager",
+  #"Biobase", 
+  #"devtools",
+  "RMySQL",
+  "sctransform",
+  "shinydashboard",
+  "shinydashboardPlus",
+  "shinyWidgets",
+  "bsplus",
+  "shinyBS",
+  "shinyjs",
+  "stringr", #regular expression
+  "DT", #for tables
+  "DBI", #For file gestion & postgreSQL
+  "fs", #For file gestion
+  "shinyFiles", #For file gestion
+  "RMySQL", #for mySQL
+  "htmltools",
+  "ggplot2", #For plots
+  "plotly", #For plots
+  "scales",
+  "factoextra", #VM for PCA
+  "FactoMineR", #VM for PCA
+  "jsonlite", #API
+  "httr"#, #API
+  #"Seurat" #Single-cell
+) 
+for (lib in requiredLib) {
+  #if (!require(lib, character.only = TRUE)) {
+    #install.packages(lib,repos = "http://cran.us.r-project.org")
+  #}
+  require(lib, character.only = TRUE)
+}
+
