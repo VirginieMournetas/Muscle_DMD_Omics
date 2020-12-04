@@ -1,6 +1,6 @@
 #rm(list =ls())
-setwd("/home/virginie/shared/Muscle_DMD_Omics")
-#setwd("/src/shiny-server/Muscle_DMD_Omics")
+#setwd("/home/virginie/shared/Muscle_DMD_Omics")
+setwd("/src/shiny-server/Muscle_DMD_Omics")
 
 Last_Update <- "04/12/20"
 
