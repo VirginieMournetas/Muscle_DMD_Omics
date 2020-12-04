@@ -78,10 +78,6 @@ UniquemiRData[ , 8] <- factor(UniquemiRData[ , 8],
                                            "Healthy Myoblast","DMD Myoblast" , 
                                            "Healthy Myotube","DMD Myotube"))
 
-#PCA
-mRNA.expr.PCs <- readRDS(file = file.path(dir["Data"], "mRNA.expr.PCs.rds"))
-miR.expr.PCs <- readRDS(file = file.path(dir["Data"], "miR.expr.PCs.rds"))
-
 #Single-cell data
 singlecell.matrix <- readRDS(file = file.path(dir["Data"], "singlecell.matrix.rds"))
 singlecell <- readRDS(file = file.path(dir["Data"], "singlecell.rds"))
@@ -124,6 +120,9 @@ db_Disease_ClinVar <- nextcloud.links("2Dqf5sbpZBC26SB")
 db_Disease_ClinicalTrials <- nextcloud.links("Xg5SyzeXgyik8ZN") 
 #db_miRGator <- nextcloud.links("iAmnLbC5SMkLy6z") 
 
+Logo_PCA <- nextcloud.links("y4bsggRPD2eT5Jd") 
+Logo_Corr <- nextcloud.links("LXHE6gZfRPY5b6L") 
+
 #Database links
 {
   links_list <- matrix(NA, nrow = 9 , ncol = 3)
@@ -132,3 +131,14 @@ db_Disease_ClinicalTrials <- nextcloud.links("Xg5SyzeXgyik8ZN")
   links_list[ ,2] <- c("GeneCards" , "NCBI" , "Ensembl" , "PAXdb" , "UniProt" , "The Human Protein Atlas" , "DisGeNET" , "Genetics Home Reference" , "OMIM")
   
 }
+
+#### GRAPHS ####
+
+#Plotly margins
+m <- list(
+  l = 10,
+  r = 10,
+  b = 10,
+  t = 100,
+  pad = 4
+)

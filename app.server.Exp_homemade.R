@@ -1,3 +1,5 @@
+#### WINDOWS #### 
+
 #### plots window #### 
 output$exp.homemade.graphs <- renderUI({
   exp1.Status()
@@ -23,7 +25,7 @@ output$exp.homemade.graphs <- renderUI({
                                    column(9 , boxPlus(title = "Single-cell transcriptomic data (Day 17)",
                                                       closable = FALSE , collapsible = TRUE , collapsed = FALSE ,
                                                       solidHeader = TRUE , width = 12 , status = "primary" , 
-                                                      fluidRow(column(4 , br(), br(), h5(tags$b("Reads / cell")), br(),
+                                                      fluidRow(column(4 , br(), br(), br(), h5(tags$b("Reads / cell")), br(),
                                                                           plotlyOutput(outputId = "Exp_homemade_Graph_plot3"), style = "text-align:center"),
                                                                column(8 , selectInput("SingleCell.reduction.2", label = tags$b("Select the reduction"), 
                                                                                        choices = list("tSNE" = "tsne" , 
@@ -77,7 +79,36 @@ output$exp.homemade.tables <- renderUI({
   }
 })
 
-#### mRNA / miR data table #### 
+
+
+#### TABLES #### 
+
+####ALL GENE
+
+#mRNA datatable
+output$Homemade_mRNA_table <- DT::renderDataTable({
+  table <- mRNAseqData.full %>% select(one_of(input$mRNAseqData.selected.columns))
+  Render_Table(unique(table))
+  #Render_Table(SQL_Table("mRNAseqData"))
+})
+
+#miR datatable
+output$Homemade_miR_table <- DT::renderDataTable({
+  table <- miRseqData.full %>% select(one_of(input$miRseqData.selected.columns))
+  Render_Table(unique(table))
+  #Render_Table(SQL_Table("miRseqData"))
+})
+
+#ALL Protein datatable
+output$Homemade_protein_table <- DT::renderDataTable({
+  table <- ProteinData.full %>% select(one_of(input$ProteinData.selected.columns))
+  Render_Table(unique(table))
+  #Render_Table(SQL_Table("ProteinData"))
+})
+
+####SINGLE GENE
+
+# mRNA / miR data TABLE 
 output$Exp_homemade_table_unique <- DT::renderDataTable({
   
   exp1.Status()
@@ -110,10 +141,9 @@ output$Exp_homemade_table_unique <- DT::renderDataTable({
       Render_Table(mRNA_RatioStat_Data_Phenotype)
     }
   }
-  
 })
 
-#### Protein Data table #### 
+# Protein Data TABLE 
 output$Exp_homemade_table_uniqueProt <- DT::renderDataTable({
   
   exp1.Status()
@@ -124,8 +154,67 @@ output$Exp_homemade_table_uniqueProt <- DT::renderDataTable({
   Render_Table(ProteinData_Table)
 })
 
-#### mRNA / miR plots #### 
-output$Exp_homemade_Graph_plot1 <- renderPlotly({{
+
+
+#### PLOTS #### 
+
+# mRNA / miR plots
+
+####ALL GENE
+
+#PCA
+
+output$Exp_homemade_PCA.mRNA <- renderPlotly({
+  
+  withProgress(message = 'Generating PCA data', detail = "part 0", value = 0, {
+    for (i in 1:3) {
+      # Each time through the loop, add another row of data. This a stand-in
+      # for a long-running computation.
+      
+      graph2 <- PCA.graph("mRNA", mRNAseqData.short, input$mRNA.PCA.component1, input$mRNA.PCA.component2, as.integer(input$mRNA.PCA.legend), input$mRNA.PCA.threshold, input$mRNA.PCA.samples)
+
+      # Increment the progress bar, and update the detail text.
+      incProgress(0.333, detail = paste("part", i))
+      
+      # Pause for 0.1 seconds to simulate a long computation.
+      #Sys.sleep(0.1)
+    }})
+  
+  graph2       
+})
+
+output$Exp_homemade_PCA.miR <- renderPlotly({
+  PCA.graph("miR", miRseqData.short, input$miR.PCA.component1, input$miR.PCA.component2, as.integer(input$miR.PCA.legend), input$miR.PCA.threshold, input$miR.PCA.samples)
+})
+
+#Correlations
+
+output$Exp_homemade_corr.mRNA <- renderPlotly({
+  
+  withProgress(message = 'Generating correlation data', detail = "part 0", value = 0, {
+    for (i in 1:3) {
+      # Each time through the loop, add another row of data. This a stand-in
+      # for a long-running computation.
+      
+      graph <- Corr.graph(mRNAseqData.short, "mRNA", input$mRNA.corr.threshold, input$mRNA.corr.method, input$mRNA.corr.samples)
+      
+      # Increment the progress bar, and update the detail text.
+      incProgress(0.333, detail = paste("part", i))
+      
+      # Pause for 0.1 seconds to simulate a long computation.
+      #Sys.sleep(0.1)
+    }})
+  
+  graph  
+  
+})
+
+output$Exp_homemade_corr.miR <- renderPlotly({
+  Corr.graph(miRseqData.short, "miR", input$miR.corr.threshold, input$miR.corr.method, input$miR.corr.samples)
+})
+
+####SINGLE GENE
+output$Exp_homemade_Graph_plot1 <- renderPlotly({
   
   exp1.Status()
   
@@ -156,100 +245,65 @@ output$Exp_homemade_Graph_plot1 <- renderPlotly({{
     mRNA_RatioStat_Data_Phenotype <- Graph4_to_7_table(mRNA_RatioStat_Data_Phenotype, mRNA_Ratios_Stats.short, "mRNA", id.query$Id.data, "PHENOTYPE")
     
     Graph_view(input$Exp_homemade_Graph, UniquemRNAData_sorted, UniquemRNAmeanData, id.query$ID.selected, mRNA_RatioStat_Data_Myogenesis, mRNA_RatioStat_Data_Phenotype)
-    
-  }
-  
- 
-}})
-
-output$Exp_homemade_PCA.mRNA <- renderPlotly({
-  PCA.graph("mRNA", mRNA.expr.PCs$ind$coord, input$mRNA.PCA.component1, input$mRNA.PCA.component2, SampleDescription[,as.integer(input$mRNA.PCA.legend)])
+  }   
 })
 
-output$Exp_homemade_PCA.miR <- renderPlotly({
-  PCA.graph("miR", miR.expr.PCs$ind$coord, input$miR.PCA.component1, input$miR.PCA.component2, SampleDescription[c(1:12,seq(13,102,3)),as.integer(input$miR.PCA.legend)])
-})
 
-#### Protein plot #### 
+# Protein plot
 output$Exp_homemade_Graph_plot2 <- renderPlotly({
+    
+    exp1.Status()
+    
+    {
+      ProteinData.unique <- unique(ProteinData.full[, c(4, 9:17)])
+      ProteinData_Boxplot[ , 3] <- t(ProteinData.unique[ProteinData.unique$Uniprot %in% id.query$Id.data$uniprot , -1])
+      if (!is.na(ProteinData_Boxplot[1,3])){
+        {
+          ggplot(ProteinData_Boxplot
+                 , aes(x = Data , y = Protein , text = paste(Ratio , ": " , Protein)))+            
+            geom_hline(yintercept = 1 , linetype = "dashed")+
+            geom_boxplot(width = 0.7 , color = "BLACK" , alpha = 0.5 , fill = 'grey') +
+            geom_point(color = "black" , size = 3)+ 
+            geom_hline(yintercept = 1)+
+            geom_hline(yintercept = 2 , linetype = "dashed")+
+            geom_hline(yintercept = 1.32 , linetype = "dashed" , color = "grey")+
+            geom_hline(yintercept = 0.76 , linetype = "dashed" , color = "grey")+
+            geom_hline(yintercept = 0.5 , linetype = "dashed")+
+            scale_y_continuous(trans = log2_trans() , breaks = c(0.5 , 0.76 , 1 , 1.32 , 2))+  
+            xlab("") +
+            ylab("DMD/Healthy ratios") +
+            theme_bw() +
+            scale_x_discrete(labels = function(x) str_wrap(x , width = 9))+
+            theme(
+              axis.title.y = element_text(color = "black" , face = "bold" , size = 9) , 
+              axis.text.y = element_text(color = "black" , face = "bold" , size = 9) , 
+              plot.title = element_text(lineheight = 8 , face = "bold" , size = 9)
+            )#+
+          #ggtitle(paste(id.query$ID.selected))
+          Graph <- ggplotly(p = ggplot2::last_plot() , 
+                            width = NULL , 
+                            height = NULL , 
+                            tooltip = "text" , 
+                            dynamicTicks = FALSE , 
+                            layerData = 1 , 
+                            originalData = TRUE , 
+                            source = "A" , 
+                            text = "") %>% layout(title = id.query$ID.selected, margin = m)
+        }}else{message("No data")}
+    }
+    
+  })
   
-  exp1.Status()
-  
-  {
-    ProteinData.unique <- unique(ProteinData.full[, c(4, 9:17)])
-    ProteinData_Boxplot[ , 3] <- t(ProteinData.unique[ProteinData.unique$Uniprot %in% id.query$Id.data$uniprot , -1])
-  }
-  {
-    ggplot(ProteinData_Boxplot
-           , aes(x = Data , y = Protein , text = paste(Ratio , ": " , Protein)))+            
-      geom_hline(yintercept = 1 , linetype = "dashed")+
-      geom_boxplot(width = 0.7 , color = "BLACK" , alpha = 0.5 , fill = 'grey') +
-      geom_point(color = "black" , size = 3)+ 
-      geom_hline(yintercept = 1)+
-      geom_hline(yintercept = 2 , linetype = "dashed")+
-      geom_hline(yintercept = 1.32 , linetype = "dashed" , color = "grey")+
-      geom_hline(yintercept = 0.76 , linetype = "dashed" , color = "grey")+
-      geom_hline(yintercept = 0.5 , linetype = "dashed")+
-      scale_y_continuous(trans = log2_trans() , breaks = c(0.5 , 0.76 , 1 , 1.32 , 2))+  
-      xlab("") +
-      ylab("DMD/Healthy ratios") +
-      theme_bw() +
-      scale_x_discrete(labels = function(x) str_wrap(x , width = 9))+
-      theme(
-        axis.title.y = element_text(color = "black" , face = "bold" , size = 9) , 
-        axis.text.y = element_text(color = "black" , face = "bold" , size = 9) , 
-        plot.title = element_text(lineheight = 8 , face = "bold" , size = 9)
-      )#+
-    #ggtitle(paste(id.query$ID.selected))
-    Graph <- ggplotly(p = ggplot2::last_plot() , 
-                      width = NULL , 
-                      height = NULL , 
-                      tooltip = "text" , 
-                      dynamicTicks = FALSE , 
-                      layerData = 1 , 
-                      originalData = TRUE , 
-                      source = "A" , 
-                      text = "")
-  }
-})
 
-#### Single-cell mRNA plots ####
-output$Exp_homemade_Graph_plot3 <- renderPlotly({
-  
-  table <- SC_datacount(singlecell.matrix, id.query$Id.data$symbol)
-  fig <- plot_ly(
-    x = rownames(table),
-    y = table[,1],
-    type = "bar", 
-    marker = list(color = 'rgb(158,217,59)')
-  ) %>% layout(xaxis = list(title = "Number of reads"), yaxis = list(title = "Number of cells"))
-  fig
-})
+# Single-cell mRNA plots
 
-output$Exp_homemade_Graph_plot4 <- renderPlotly({
-  FeaturePlot(
-    singlecell,
-    id.query$Id.data$symbol,
-    reduction = input$SingleCell.reduction.2,
-    dims = c(input$SingleCell.component1.2, input$SingleCell.component2.2),
-    cells = NULL,
-    c("lightgrey", '#9ED93B', '#3F5617', '#000000'))
-  ggplotly(p = ggplot2::last_plot() , 
-           width = NULL , 
-           height = NULL , 
-           tooltip = "all" , 
-           dynamicTicks = FALSE , 
-           layerData = 1 , 
-           originalData = TRUE , 
-           source = "A")
-})
-
+####ALL GENE
 output$Exp_homemade_SingleCell.reduc <- renderPlotly({
   DimPlot(object = singlecell, 
           reduction = input$SingleCell.reduction,
           dims = c(input$SingleCell.component1, input$SingleCell.component2),
           cols =  '#9ED93B'
-          )
+  )
   ggplotly(p = ggplot2::last_plot() , 
            width = NULL , 
            height = NULL , 
@@ -257,4 +311,51 @@ output$Exp_homemade_SingleCell.reduc <- renderPlotly({
            dynamicTicks = FALSE , 
            layerData = 1 , 
            originalData = TRUE , 
-           source = "A")})
+           source = "A") %>% layout(margin = m)
+  })
+
+####SINGLE GENE
+output$Exp_homemade_Graph_plot3 <- renderPlotly({
+  
+  withProgress(message = 'Generating data', detail = "part 0", value = 0, {
+    for (i in 1:2) {
+      # Each time through the loop, add another row of data. This a stand-in
+      # for a long-running computation.
+      
+      table <- SC_datacount(singlecell.matrix, id.query$Id.data$symbol)
+      fig <- plot_ly(
+        x = rownames(table),
+        y = table[,1],
+        type = "bar", 
+        marker = list(color = 'rgb(158,217,59)')
+      ) %>% layout(title = id.query$ID.selected, xaxis = list(title = "Number of reads"), yaxis = list(title = "Number of cells"), margin = m)
+      
+      # Increment the progress bar, and update the detail text.
+      incProgress(0.5, detail = paste("part", i))
+      
+      # Pause for 0.1 seconds to simulate a long computation.
+      #Sys.sleep(0.1)
+    }
+  })
+  
+  fig
+})
+
+output$Exp_homemade_Graph_plot4 <- renderPlotly({
+  
+  FeaturePlot(
+      singlecell,
+      id.query$Id.data$symbol,
+      reduction = input$SingleCell.reduction.2,
+      dims = c(input$SingleCell.component1.2, input$SingleCell.component2.2),
+      cells = NULL,
+      c("lightgrey", '#9ED93B', '#3F5617', '#000000'))
+    ggplotly(p = ggplot2::last_plot() , 
+             width = NULL , 
+             height = NULL , 
+             tooltip = "all" , 
+             dynamicTicks = FALSE , 
+             layerData = 1 , 
+             originalData = TRUE , 
+             source = "A") %>% layout(margin = m)
+})

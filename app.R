@@ -1,11 +1,12 @@
 #rm(list =ls())
 #setwd("/home/virginie/shared/Muscle_DMD_Omics")
+setwd("/src/shiny-server/Muscle_DMD_Omics")
 
-Last_Update <- "03/12/20"
+Last_Update <- "04/12/20"
 
 
 #### FOLDERS #### 
-source("app.prior.folders.R", local = TRUE, encoding = "UTF-8") #/home/virginie/shared/Muscle_DMD_Omics/
+source("app.prior.folders.R", local = TRUE, encoding = "UTF-8")
 
 ####LIBRARIES####
 source(file.path(dir["base"], "app.prior.libraries.R"), local = TRUE, encoding = "UTF-8")
@@ -80,8 +81,7 @@ ui <- dashboardPagePlus(skin = "black" ,
                                       side = "left" , 
                                       tabPanel(p(icon("cloud-download-alt") , tags$b("Raw data"), style = "color:#367FA9"), source(file.path(dir["base"], "app.ui.Exp1.R"), local = TRUE)$value),
                                       tabPanel(p(icon("table") , tags$b("Entire datasets") , style = "color:#367FA9"), source(file.path(dir["base"], "app.ui.Exp2.R"), local = TRUE)$value),      
-                                      tabPanel(p(icon("chart-bar") , tags$b("Single-gene expression data") , style = "color:#367FA9"), source(file.path(dir["base"], "app.ui.Exp3.R"), local = TRUE)$value),     
-                                      tabPanel(p(icon("question-circle") , tags$b("Help") , style = "color:#367FA9") , source(file.path(dir["base"], "app.ui.Data_Help.R"), local = TRUE)$value))),
+                                      tabPanel(p(icon("chart-bar") , tags$b("Single-gene expression data") , style = "color:#367FA9"), source(file.path(dir["base"], "app.ui.Exp3.R"), local = TRUE)$value))),
                             
                             
                             # Tab.Ref ####

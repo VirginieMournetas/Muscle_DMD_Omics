@@ -1,5 +1,4 @@
 #### GENERAL -  Table view ####
-
 Render_Table <- function(DATA){
   DT::datatable(
     DATA , 
@@ -73,7 +72,7 @@ Infos <- function (Product.type, ID.selected, ID.type, con){
 }
 
 db_Links <- function (Product.type, Infos){ #need to deal with multiple 
-  links_list <- data.frame(matrix(NA, ncol =3, nrow = 21))
+  links_list <- data.frame(matrix(NA, ncol =3, nrow = 25))
   links_list[1,3] <- paste0("https://www.genecards.org/cgi-bin/carddisp.pl?gene=" , Infos$symbol[1]) #genecards
   links_list[2,3] <- paste0("https://www.ncbi.nlm.nih.gov/gene/" , Infos$entrezgeneid[1]) #ncbi
   links_list[3,3] <- paste0("http://www.ensembl.org/Homo_sapiens/Gene/Summary?db=core;g=" , Infos$ensembl[1]) #ensembl
@@ -88,14 +87,13 @@ db_Links <- function (Product.type, Infos){ #need to deal with multiple
   links_list[12,3] <- paste0("https://www.grnpedia.org/trrust/result_tonly.php?gene=", Infos$symbol[1], "&species=human&confirm=0") #trrust
   links_list[13,3] <- paste0("https://www.genome.jp/dbget-bin/www_bget?hsa:", Infos$entrezgeneid[1]) #kegg
   links_list[14,3] <- paste0("https://thebiogrid.org/108096/summary/homo-sapiens/", Infos$symbol[1], ".html") #biogrid
-  links_list[15,3] <- paste0("http://carolina.imis.athena-innovation.gr/diana_tools/web/index.php?r=tarbasev8%2Findex&miRNAs%5B%5D=&miRNAs%5B%5D=", Infos$ensembl[1], "&genes%5B%5D=DMD&sources%5B%5D=1&sources%5B%5D=7&sources%5B%5D=9&publication_year=&prediction_score=&sort_field=&sort_type=&query=1") #diana_tools
-  #http://carolina.imis.athena-innovation.gr/diana_tools/web/index.php?r=tarbasev8%2Findex&miRNAs%5B%5D=&miRNAs%5B%5D=hsa-miR-206&genes%5B%5D=&sources%5B%5D=1&sources%5B%5D=7&sources%5B%5D=9&publication_year=&prediction_score=&sort_field=&sort_type=&query=1
-  links_list[16,3] <- paste0("http://mirtarbase.mbc.nctu.edu.tw/php/search.php?org=hsa&kw=", Infos$symbol[1], "&opt=target")
-  #http://mirtarbase.mbc.nctu.edu.tw/php/search.php?org=hsa&opt=mirna_id&kw=hsa-mir-206
+  links_list[15,3] <- paste0("http://carolina.imis.athena-innovation.gr/diana_tools/web/index.php?r=tarbasev8%2Findex&miRNAs%5B%5D=&genes%5B%5D=", Infos$symbol[1], "&sources%5B%5D=1&sources%5B%5D=7&sources%5B%5D=9&publication_year=&prediction_score=&sort_field=&sort_type=&query=") #diana_tools - gene
+  links_list[22,3] <- paste0("http://carolina.imis.athena-innovation.gr/diana_tools/web/index.php?r=tarbasev8%2Findex&miRNAs%5B%5D=&miRNAs%5B%5D=", Infos$human_mirbase_name[1], "&genes%5B%5D=&sources%5B%5D=1&sources%5B%5D=7&sources%5B%5D=9&publication_year=&prediction_score=&sort_field=&sort_type=&query=1") #diana_tools - miR
+  links_list[16,3] <- paste0("http://mirtarbase.mbc.nctu.edu.tw/php/search.php?org=hsa&kw=", Infos$symbol[1], "&opt=target") #mirtarbase
+  links_list[23,3] <- paste0("http://mirtarbase.mbc.nctu.edu.tw/php/search.php?org=hsa&opt=mirna_id&kw=", Infos$human_mirbase_name[1]) #mirtarbase
   links_list[17,3] <- paste0("http://www.targetscan.org/cgi-bin/targetscan/vert_72/targetscan.cgi?species=Human&gid=", Infos$symbol[1], "&mir_sc=&mir_c=&mir_nc=&mir_vnc=&mirg=") #TargetScanHuman
-  #http://www.targetscan.org/cgi-bin/targetscan/vert_72/targetscan.cgi?species=Human&gid=&mir_sc=&mir_c=&mir_nc=&mir_vnc=&mirg=hsa-mir-206
-  #http://www.mirbase.org/cgi-bin/mirna_entry.pl?acc=MI0000490
-  #http://www.mirbase.org/textsearch.shtml?q=MIR206&submit=submit
+  links_list[24,3] <- paste0("http://www.targetscan.org/cgi-bin/targetscan/vert_72/targetscan.cgi?species=Human&gid=&mir_sc=&mir_c=&mir_nc=&mir_vnc=&mirg=", Infos$human_mirbase_name[1]) #TargetScanHuman
+  links_list[25,3] <- paste0("http://www.mirbase.org/cgi-bin/mirna_entry.pl?acc=", Infos$human_mirbase_id[1])
   links_list[18,3] <- paste0("https://www.ncbi.nlm.nih.gov/search/all/?term=", Infos$symbol[1]) #ALL_NCBI
   links_list[19,3] <- paste0("https://www.ncbi.nlm.nih.gov/bioproject/?term=", Infos$symbol[1]) #BioProject
   links_list[20,3] <- paste0("https://clinicaltrials.gov/ct2/results?cond=&term=", Infos$symbol[1]) #ClinicalTrials
@@ -204,7 +202,7 @@ Graph_view <- function(input_RNA_Graph, UniqueRNAData_sorted, UniqueRNAmeanData,
         type = "box" , 
         boxpoints = "all" , jitter = 0.2 , pointpos = -1.8
       )
-    fig <- fig %>% layout(yaxis = list(title = "Normalised counts") , barmode = 'group')
+    fig <- fig %>% layout(title = input_RNA, yaxis = list(title = "Normalised counts") , barmode = 'group')
     Graph <- fig
   }else if (input_RNA_Graph == 2) {
     fig <- plot_ly() 
@@ -219,7 +217,7 @@ Graph_view <- function(input_RNA_Graph, UniqueRNAData_sorted, UniqueRNAmeanData,
         text = UniqueRNAData_sorted[ , 7] , 
         showlegend = T
       ) 
-    fig <- fig %>% layout(yaxis = list(title = "Normalised counts") , barmode = 'group')
+    fig <- fig %>% layout(title = input_RNA, yaxis = list(title = "Normalised counts") , barmode = 'group')
     Graph <- fig
   }else if (input_RNA_Graph == 3) {
     ggplot(UniqueRNAmeanData
@@ -245,7 +243,7 @@ Graph_view <- function(input_RNA_Graph, UniqueRNAData_sorted, UniqueRNAmeanData,
                       dynamicTicks = FALSE , 
                       layerData = 1 , 
                       originalData = TRUE , 
-                      source = "A")
+                      source = "A") %>% layout(margin = m)
   }else if (input_RNA_Graph == 4) {
     ggplot(RNA_RatioStats_Data_Myogenesis
            , aes(x = Days , y = Mean)) +          
@@ -273,7 +271,7 @@ Graph_view <- function(input_RNA_Graph, UniqueRNAData_sorted, UniqueRNAmeanData,
                       dynamicTicks = FALSE , 
                       layerData = 1 , 
                       originalData = TRUE , 
-                      source = "A")
+                      source = "A") %>% layout(margin = m)
   }else if (input_RNA_Graph == 5) {
     ggplot(RNA_RatioStats_Data_Myogenesis
            , aes(x = Days , y = Mean , colour = Significant)) +        
@@ -302,7 +300,7 @@ Graph_view <- function(input_RNA_Graph, UniqueRNAData_sorted, UniqueRNAmeanData,
                       dynamicTicks = FALSE , 
                       layerData = 1 , 
                       originalData = TRUE , 
-                      source = "A")
+                      source = "A") %>% layout(margin = m)
   }else if (input_RNA_Graph == 6) {
     ggplot(RNA_RatioStats_Data_Phenotype
            , aes(x = Days , y = Mean))+          
@@ -330,7 +328,7 @@ Graph_view <- function(input_RNA_Graph, UniqueRNAData_sorted, UniqueRNAmeanData,
                       dynamicTicks = FALSE , 
                       layerData = 1 , 
                       originalData = TRUE , 
-                      source = "A")
+                      source = "A") %>% layout(margin = m)
   }else if (input_RNA_Graph == 7) {
     ggplot(RNA_RatioStats_Data_Phenotype
            , aes(x = Days , y = Mean , colour = Significant))+        
@@ -359,7 +357,7 @@ Graph_view <- function(input_RNA_Graph, UniqueRNAData_sorted, UniqueRNAmeanData,
                       dynamicTicks = FALSE , 
                       layerData = 1 , 
                       originalData = TRUE , 
-                      source = "A")
+                      source = "A") %>% layout(margin = m)
   }  
   return(Graph)
 }
@@ -381,21 +379,173 @@ SC_datacount <- function(matrix, gene){
 }
 
 #PCA graph
-PCA.graph <- function(product, data, x, y, color){
-  if (product == "mRNA"){Sample <- SampleDescription}else if(product == "miR"){Sample <- SampleDescription[c(1:12,seq(13,102,3)),]}
-  fig <- plot_ly(data = as.data.frame(data), 
-                 x = data[,x], 
-                 y = data[,y], 
-                 color = color, 
-                 text = paste("Cell stage:", Sample[,1], 
-                              '<br>Phenotype:', Sample[,2],
-                              '<br>Cell line:', Sample[,3],
-                              '<br>Differentiation:', Sample[,4]),
+PCA.graph <- function(Datatype , Data, x, y, color, threshold, samples.select){
+  
+  
+  if (Datatype == "miR"){
+    Sample.name <- SampleDescription[c(1:12,seq(13,102,3)),]
+    p <- 43
+    v <- seq(2,43,3)}else if(Datatype == "mRNA"){
+      Sample.name <- SampleDescription
+      p <- 103
+      v <- c(seq(2,13,3), seq(14,103,9))}
+  
+  if (samples.select == "All"){samples <- c(2:p)}else{
+    if (samples.select == "Healthy"){
+      j <- 1
+    }else if(samples.select == "DMD"){
+      j <- 2 
+    }
+    samples <- c()
+    for (i in c(1:7)){
+      if(j == 14){k <- p}else{k <- v[j+1]-1}
+      samples <- c(samples, v[j]: k)
+      j <- j +2
+    }
+    Sample.name <- Sample.name[samples-1, ]
+  }
+  
+  data.to.transform <- Data[apply(Data[,c(1,samples)], 1, max) >= threshold,] 
+  expr.PCs <- PCA(t(data.to.transform[, samples]), scale.unit = TRUE, ncp = 6, graph = FALSE)
+  
+  fig <- plot_ly(data = as.data.frame(expr.PCs$ind$coord), 
+                 x = expr.PCs$ind$coord[,x], 
+                 y = expr.PCs$ind$coord[,y], 
+                 color = Sample.name[,as.integer(color)], 
+                 text = paste("Cell stage:", Sample.name[,1], 
+                              '<br>Phenotype:', Sample.name[,2],
+                              '<br>Cell line:', Sample.name[,3],
+                              '<br>Differentiation:', Sample.name[,4]),
                  type = 'scatter',
                  mode = "markers") %>% layout(
+                   margin = m,
                    title = "PCA",
-                   xaxis = list(title = paste("Dim",x, paste0("(", round(mRNA.expr.PCs$eig[x,2], 1)), "%)")),
-                   yaxis = list(title = paste("Dim",y, paste0("(", round(mRNA.expr.PCs$eig[y,2], 1)), "%)")))
+                   xaxis = list(title = paste("Dim",x, paste0("(", round(expr.PCs$eig[x,2], 1)), "%)")),
+                   yaxis = list(title = paste("Dim",y, paste0("(", round(expr.PCs$eig[y,2], 1)), "%)")))
   
   fig
 }
+
+#Correlation graph
+Corr.graph <- function(Data, Datatype , threshold = 5, method = "spearman", samples.select){
+  
+  if (Datatype == "miR"){
+    p <- 43
+    v <- seq(2,43,3)}else if(Datatype == "mRNA"){
+      p <- 103
+      v <- c(seq(2,13,3), seq(14,103,9))}
+  
+  if (samples.select == "All"){samples <- c(2:p)}else{
+    if (samples.select == "Healthy"){
+      j <- 1
+    }else if(samples.select == "DMD"){
+      j <- 2 
+    }
+    samples <- c()
+    for (i in c(1:7)){
+      if(j == 14){k <- p}else{k <- v[j+1]-1}
+      samples <- c(samples, v[j]: k)
+      j <- j +2
+    }
+  }
+    
+  data.to.transform <- Data[apply(Data[,c(1,samples)], 1, max) >= threshold,] 
+  StandardizedData <- scale(t(data.to.transform[,samples]), center = TRUE, scale = TRUE)
+  CorrData <- cor(t(StandardizedData), method = method, use = "pairwise.complete.obs")
+  
+  #do this before the transformation!
+  CorrData[upper.tri(CorrData, diag = FALSE)] <- NA
+  #CorrData <- CorrData[-1, -ncol(CorrData)]
+  
+  #Store our variable names for later use
+  x_labels <- colnames(CorrData)
+  y_labels <- rownames(CorrData)
+  
+  #Change the variable names to numeric for the grid
+  colnames(CorrData) <- 1:ncol(CorrData)
+  rownames(CorrData) <- nrow(CorrData):1
+  
+  #Melt the data into the desired format
+  plotdata <- reshape2::melt(CorrData)
+  
+  #Adding the size variable & scaling it
+  plotdata$size <- (abs(plotdata$value))
+  scaling <- 500 / ncol(CorrData) / 2
+  plotdata$size <- plotdata$size * scaling
+  
+  #Setting x and y ranges for the chart
+  xrange <- c(0.5, length(x_labels)+0.5)
+  yrange <- c(0.5, length(y_labels)+0.5)
+  
+  #Setting the gridlines
+  x_grid <- seq(1.5, length(x_labels)-0.5, 1)
+  y_grid <- seq(1.5, length(y_labels)-0.5, 1)
+  
+  
+  #Axes definitions
+  xAx1 <- list(showgrid = FALSE,
+               showline = FALSE,
+               zeroline =  FALSE,
+               tickvals = colnames(CorrData),
+               ticktext = x_labels,
+               title = "",
+               tickfont = list(size = 8),
+               range = xrange,
+               rangemode = "tozero")
+  
+  xAx2 <- list(showgrid = TRUE,
+               showline = FALSE,
+               zeroline =  FALSE,
+               overlaying = "x",
+               showticklabels = FALSE,
+               tickfont = list(size = 8),
+               range = xrange,
+               tickvals = x_grid)
+  
+  yAx1 <- list(autoaxis = FALSE,
+               showgrid = FALSE,
+               showline = FALSE,
+               zeroline =  FALSE,
+               tickvals = rownames(CorrData),
+               ticktext = y_labels,
+               tickfont = list(size = 8),
+               title = FALSE,
+               rangemode = "tozero",
+               range = yrange)
+  
+  yAx2 <- list(showgrid = TRUE,
+               showline = FALSE,
+               zeroline =  FALSE,
+               tickfont = list(size = 8),
+               overlaying = "y",
+               showticklabels = FALSE,
+               range = yrange,
+               tickvals = y_grid)
+  
+  
+  fig <- plot_ly(data = plotdata, height = 600) #, width = 500, height = 500
+  
+  fig <- fig %>% add_trace(x = ~Var2, y = ~Var1, type = "scatter", mode = "markers",
+                           color = ~value,
+                           marker = list(size = ~size, opacity = 1),
+                           symbol = I("circle"),
+                           text = ~value,
+                           hovertemplate = "%{text:.2f} <extra></extra>",
+                           xaxis = "x1",
+                           yaxis = "y1")
+  
+  fig <- fig %>% layout(xaxis = xAx1,
+                        yaxis = yAx1, 
+                        xaxis2 = xAx2,
+                        yaxis2 = yAx2#,
+                        #plot_bgcolor = "rgba(0,0,0,0)",
+                        #paper_bgcolor = "rgba(0, 0, 0, 0.03)"
+  )
+  
+  fig <- fig %>% colorbar(title = "", limits = c(-1,1), x = 1.1, y = 0.75)
+  
+  fig
+}
+
+
+

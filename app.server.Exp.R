@@ -1,7 +1,6 @@
 id.query <- reactiveValues()
 
 #### ID list #### 
-
 output$Product.select <- renderUI({
   if (input$Product.type == "miR"){
     list <- list("EntrezGene ID",
@@ -26,25 +25,21 @@ output$Product.select <- renderUI({
               width = 150)
 })
 
-
 #### ID select #### 
 output$ID.select <- renderUI({
   
   if (input$Product.type == "miR"){
     val <- "MIR206"
   }else if(input$Product.type == "mRNA / Protein"){
-    val <- "DMD"
+    val <- ""
   }
   
   textInput("ID.selected", label = NULL , value = val, width = '150px')
 
 }) 
 
-
-
 #### Observe #### 
-
-exp1.Status <- reactive({
+exp1.Status <- eventReactive(input$display, { #reactive({
 
   if (input$ID.type == "Ensembl ID" | input$ID.type == "Official Symbol" | input$ID.type == "Uniprot ID" | input$ID.type == "mirBase ID"){
     id.query$ID.selected <- toupper(input$ID.selected)
@@ -54,11 +49,7 @@ exp1.Status <- reactive({
   
 })
 
-
-
 #### mRNA db links #### 
-
-
 output$RNA_info <- renderUI({
   
   exp1.Status()
@@ -85,14 +76,41 @@ output$RNA_info <- renderUI({
   
 })
 
-
 output$db_links <- renderUI({
   
   exp1.Status()
   if (input$Product.type == "miR"){
     fluidRow(
-      column(3, p(" " , style = "text-align:center", uiOutput("RNA_info"))),
-      column(9, ) 
+      column(2, p(" " , style = "text-align:center", uiOutput("RNA_info"))),
+      column(2, p(tags$b("Gene/mRNA databases") , style = "text-align:center", 
+                  p(style = "text-align:center", 
+                    tags$a(tags$img(src = db_gene_ALL , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[18,3] , target = "_blank"), br() , br() ,
+                    tags$a(tags$img(src = db_Gene_GeneCards , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[1,3] , target = "_blank"), br() , br() ,
+                    tags$a(tags$img(src = db_Gene_NCBI , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[2,3] , target = "_blank") ,br() ,br() ,
+                    tags$a(tags$img(src = db_Gene_Ensembl , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[3,3] , target = "_blank"),br() ,br() ,
+                    tags$a(tags$img(src = db_Gene_HumanMine , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[11,3] , target = "_blank"),br() ,br() ,
+                    tags$a(tags$img(src = db_Gene_TargetMine , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[10,3] , target = "_blank")))), 
+      column(2, p(tags$b("Disease databases") , style = "text-align:center", 
+                  p(style = "text-align:center", 
+                    tags$a(tags$img(src = db_Disease_DisGeNET , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[7,3] , target = "_blank"), br() ,br() ,
+                    tags$a(tags$img(src = db_Disease_GeneticsHomeReference , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[8,3] , target = "_blank") , br() ,br() ,
+                    tags$a(tags$img(src = db_Disease_OMIM , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[9,3] , target = "_blank") , br() ,br() ,
+                    tags$a(tags$img(src = db_Disease_ClinVar , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[21,3] , target = "_blank") , br() ,br() ,
+                    tags$a(tags$img(src = db_Disease_ClinicalTrials , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[20,3] , target = "_blank")))),
+      column(2, p(tags$b("Interaction databases") , style = "text-align:center", 
+                  p(style = "text-align:center", 
+                    #tags$a(tags$img(src = db_links_BioGRID , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[14,3] , target = "_blank"), br() ,br() ,
+                    tags$a(tags$img(src = db_links_KEGG , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[13,3] , target = "_blank") , br() ,br() ,
+                    tags$a(tags$img(src = db_links_TRRUST , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[12,3] , target = "_blank")))),
+      column(2, p(tags$b("miR databases") , style = "text-align:center", 
+                  p(style = "text-align:center", 
+                    tags$a(tags$img(src = db_mir.mrna_DIANA , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[22,3] , target = "_blank"), br() ,br() ,
+                    tags$a(tags$img(src = db_mir.mrna_mirtarbase , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[23,3] , target = "_blank") , br() ,br() ,
+                    tags$a(tags$img(src = db_mir.mrna_TargetScanHuman , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[24,3] , target = "_blank"), br() ,br() ,
+                    tags$a(tags$img(src = db_mir_mirbase , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[25,3] , target = "_blank")))),
+      column(2, p(tags$b("Other databases") , style = "text-align:center", 
+                  p(style = "text-align:center", 
+                    tags$a(tags$img(src = db_BioProject , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[19,3] , target = "_blank"))))
     )
   }else if(input$Product.type == "mRNA / Protein"){
     fluidRow(
@@ -119,7 +137,7 @@ output$db_links <- renderUI({
                     tags$a(tags$img(src = db_Disease_ClinicalTrials , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[20,3] , target = "_blank")))),
       column(2, p(tags$b("Interaction databases") , style = "text-align:center", 
                   p(style = "text-align:center", 
-                    tags$a(tags$img(src = db_links_BioGRID , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[14,3] , target = "_blank"), br() ,br() ,
+                    #tags$a(tags$img(src = db_links_BioGRID , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[14,3] , target = "_blank"), br() ,br() ,
                     tags$a(tags$img(src = db_links_KEGG , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[13,3] , target = "_blank") , br() ,br() ,
                     tags$a(tags$img(src = db_links_TRRUST , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[12,3] , target = "_blank")))),
       column(2, p(tags$b("miR databases") , style = "text-align:center", 
@@ -133,9 +151,7 @@ output$db_links <- renderUI({
   }
 })
 
-
 #### Publi table ####
-
 output$publi.table <- DT::renderDataTable({
   exp1.Status()
   url.api <- paste0("https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=", id.query$Id.data$symbol, "%20sort_date:y&format=json")

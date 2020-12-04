@@ -24,8 +24,9 @@ requiredLib <- c(
   "ggplot2", #For plots
   "plotly", #For plots
   "scales",
-  "factoextra", #VM for PCA
-  "FactoMineR", #VM for PCA
+  "factoextra", #PCA
+  "FactoMineR", #PCA
+  "data.table", #Correlations
   "jsonlite", #API
   "httr", #API
   "Seurat" #Single-cell
