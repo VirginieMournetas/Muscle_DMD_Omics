@@ -78,6 +78,10 @@ UniquemiRData[ , 8] <- factor(UniquemiRData[ , 8],
                                            "Healthy Myoblast","DMD Myoblast" , 
                                            "Healthy Myotube","DMD Myotube"))
 
+#mRNA PCA & correlation data
+mRNA.PCs <- readRDS(file = file.path(dir["Data"], "mRNA.PCs.rds"))
+mRNA.Corrs <- readRDS(file = file.path(dir["Data"], "mRNA.Corrs.rds"))
+
 #Single-cell data
 singlecell.matrix <- readRDS(file = file.path(dir["Data"], "singlecell.matrix.rds"))
 singlecell <- readRDS(file = file.path(dir["Data"], "singlecell.rds"))

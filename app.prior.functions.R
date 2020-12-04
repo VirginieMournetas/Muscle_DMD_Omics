@@ -378,15 +378,11 @@ SC_datacount <- function(matrix, gene){
   return(table)
 }
 
-#PCA graph
-PCA.graph <- function(Datatype , Data, x, y, color, threshold, samples.select){
-  
-  
+#PCA data
+PCA.data <- function(Datatype , Data, samples.select, threshold){
   if (Datatype == "miR"){
-    Sample.name <- SampleDescription[c(1:12,seq(13,102,3)),]
     p <- 43
     v <- seq(2,43,3)}else if(Datatype == "mRNA"){
-      Sample.name <- SampleDescription
       p <- 103
       v <- c(seq(2,13,3), seq(14,103,9))}
   
@@ -402,20 +398,45 @@ PCA.graph <- function(Datatype , Data, x, y, color, threshold, samples.select){
       samples <- c(samples, v[j]: k)
       j <- j +2
     }
-    Sample.name <- Sample.name[samples-1, ]
   }
   
   data.to.transform <- Data[apply(Data[,c(1,samples)], 1, max) >= threshold,] 
   expr.PCs <- PCA(t(data.to.transform[, samples]), scale.unit = TRUE, ncp = 6, graph = FALSE)
+  return(expr.PCs)
+}
+#PCA graph
+PCA.graph <- function(Datatype , samples.select, expr.PCs, x, y, color){
+  
+  if (Datatype == "miR"){
+    SampleDescription <- SampleDescription[c(1:12,seq(13,102,3)),]
+    p <- 43
+    v <- seq(2,43,3)}else if(Datatype == "mRNA"){
+      p <- 103
+      v <- c(seq(2,13,3), seq(14,103,9))}
+  
+  if (samples.select == "All"){samples <- c(2:p)}else{
+    if (samples.select == "Healthy"){
+      j <- 1
+    }else if(samples.select == "DMD"){
+      j <- 2 
+    }
+    samples <- c()
+    for (i in c(1:7)){
+      if(j == 14){k <- p}else{k <- v[j+1]-1}
+      samples <- c(samples, v[j]: k)
+      j <- j +2
+    }
+    SampleDescription <- SampleDescription[samples-1, ]
+  }
   
   fig <- plot_ly(data = as.data.frame(expr.PCs$ind$coord), 
                  x = expr.PCs$ind$coord[,x], 
                  y = expr.PCs$ind$coord[,y], 
-                 color = Sample.name[,as.integer(color)], 
-                 text = paste("Cell stage:", Sample.name[,1], 
-                              '<br>Phenotype:', Sample.name[,2],
-                              '<br>Cell line:', Sample.name[,3],
-                              '<br>Differentiation:', Sample.name[,4]),
+                 color = SampleDescription[,as.integer(color)], 
+                 text = paste("Cell stage:", SampleDescription[,1], 
+                              '<br>Phenotype:', SampleDescription[,2],
+                              '<br>Cell line:', SampleDescription[,3],
+                              '<br>Differentiation:', SampleDescription[,4]),
                  type = 'scatter',
                  mode = "markers") %>% layout(
                    margin = m,
@@ -426,9 +447,8 @@ PCA.graph <- function(Datatype , Data, x, y, color, threshold, samples.select){
   fig
 }
 
-#Correlation graph
-Corr.graph <- function(Data, Datatype , threshold = 5, method = "spearman", samples.select){
-  
+#Correlation data
+Corr.data <- function(Data, Datatype, samples.select, threshold = 5, method = "spearman"){
   if (Datatype == "miR"){
     p <- 43
     v <- seq(2,43,3)}else if(Datatype == "mRNA"){
@@ -448,10 +468,16 @@ Corr.graph <- function(Data, Datatype , threshold = 5, method = "spearman", samp
       j <- j +2
     }
   }
-    
+  
   data.to.transform <- Data[apply(Data[,c(1,samples)], 1, max) >= threshold,] 
   StandardizedData <- scale(t(data.to.transform[,samples]), center = TRUE, scale = TRUE)
   CorrData <- cor(t(StandardizedData), method = method, use = "pairwise.complete.obs")
+  
+  return(CorrData)
+
+}
+#Correlation graph
+Corr.graph <- function(CorrData){
   
   #do this before the transformation!
   CorrData[upper.tri(CorrData, diag = FALSE)] <- NA
@@ -523,7 +549,7 @@ Corr.graph <- function(Data, Datatype , threshold = 5, method = "spearman", samp
                tickvals = y_grid)
   
   
-  fig <- plot_ly(data = plotdata, height = 600) #, width = 500, height = 500
+  fig <- plot_ly(data = plotdata, height = 550)
   
   fig <- fig %>% add_trace(x = ~Var2, y = ~Var1, type = "scatter", mode = "markers",
                            color = ~value,

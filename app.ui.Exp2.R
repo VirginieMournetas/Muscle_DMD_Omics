@@ -42,28 +42,29 @@ fluidRow(column(12 ,
           bs_append(title_side = p(icon("chart-bar") , "Graphs"), 
                     content_side = NULL , 
                     content_main = 
-                    flipBox(
+                    div(flipBox(
                       id = 100,
                       main_img = Logo_PCA, 
-                      header_img = NULL , #"https://nextcloud.virginie-mournetas.ovh/index.php/s/y4bsggRPD2eT5Jd/preview",
-                      front_title = h3(tags$b("Dimension reductions")),
-                      back_title = p(tags$img(src = Logo_Corr , style = "height:05% ; width:05% ; text-align:center"), br(), h3(tags$b("Correlations")), style = "text-align:center"),
+                      header_img = NULL , 
+                      front_title = h3(tags$b("Dimension reductions"), style = "color:#367FA9"),
+                      back_title = p(tags$img(src = Logo_Corr , style = "height:05% ; width:05% ; text-align:center"), br(), h3(tags$b("Correlations"), style = "color:#367FA9"), style = "text-align:center"),
                       front_btn_text = "Correlations",
                       back_btn_text = "Dimension reductions",
                       fluidRow(column(4, 
                                       boxPlus(
                                         closable = FALSE , collapsible = TRUE , collapsed = FALSE ,
                                         title = "Bulk mRNA PCA" , status = "primary" , solidHeader = TRUE , width = 12 ,
-                                        fluidRow(column (6, selectInput("mRNA.PCA.samples", label = tags$b("Select samples"), 
+                                        fluidRow(column (6, selectInput("mRNA.PCA.samples", label = tags$b("*Select samples"), 
                                                                         choices = list("All", "Healthy", "DMD"), 
                                                                         selected = "All")),
                                                  column (6, selectInput("mRNA.PCA.legend", label = tags$b("Select the legend"), 
                                                                         choices = list("Cell stage" = 1, "Phenotype" = 2, "Cell line" = 3), 
                                                                         selected = 1))),
-                                        fluidRow(column (4, numericInput("mRNA.PCA.threshold", label = tags$b("Select read threshold"), value = 0)),
+                                        fluidRow(column (4, numericInput("mRNA.PCA.threshold", label = tags$b("*Select read threshold"), value = 10)),
                                                  column (4, numericInput("mRNA.PCA.component1", label = tags$b("Select component x"), value = 1)),
                                                  column (4, numericInput("mRNA.PCA.component2", label = tags$b("Select component y"), value = 2))),
-                                        plotlyOutput(outputId = "Exp_homemade_PCA.mRNA")
+                                        plotlyOutput(outputId = "Exp_homemade_PCA.mRNA"), br(),
+                                        downloadButton("Exp_homemade_PCA.mRNA.Download", "Download data")
                                       )),
                                column(4, 
                                       boxPlus(
@@ -75,10 +76,11 @@ fluidRow(column(12 ,
                                                  column (6, selectInput("miR.PCA.legend", label = tags$b("Select the legend"), 
                                                                         choices = list("Cell stage" = 1, "Phenotype" = 2, "Cell line" = 3), 
                                                                         selected = 1))),
-                                        fluidRow(column (4, numericInput("miR.PCA.threshold", label = tags$b("Select read threshold"), value = 0)),
+                                        fluidRow(column (4, numericInput("miR.PCA.threshold", label = tags$b("Select read threshold"), value = 5)),
                                                  column (4, numericInput("miR.PCA.component1", label = tags$b("Select component x"), value = 1)),
                                                  column (4, numericInput("miR.PCA.component2", label = tags$b("Select component y"), value = 2))),
-                                        plotlyOutput(outputId = "Exp_homemade_PCA.miR")
+                                        plotlyOutput(outputId = "Exp_homemade_PCA.miR"), br(),
+                                        downloadButton("Exp_homemade_PCA.miR.Download", "Download data")
                                       )),
                                column(4, 
                                       boxPlus(
@@ -91,20 +93,23 @@ fluidRow(column(12 ,
                                                     selected = "tsne"),
                                         fluidRow(column (6, numericInput("SingleCell.component1", label = tags$b("Select component x"), value = 1)),
                                                  column (6, numericInput("SingleCell.component2", label = tags$b("Select component y"), value = 2))),
-                                        plotlyOutput(outputId = "Exp_homemade_SingleCell.reduc")
+                                        plotlyOutput(outputId = "Exp_homemade_SingleCell.reduc"), br(),
+                                        downloadButton("Exp_homemade_SingleCell.reduc.Download", "Download data")
                                       ))),
+                      p(br()), 
                       back_content = tagList(
                         fluidRow(column(6, 
                                         boxPlus(
                                           closable = FALSE , collapsible = TRUE , collapsed = FALSE , height = 750,
                                           title = "Bulk mRNA correlation" , status = "primary" , solidHeader = TRUE , width = 12 ,
-                                          fluidRow(column (4, selectInput("mRNA.corr.samples", label = tags$b("Select samples"), 
+                                          fluidRow(column (4, selectInput("mRNA.corr.samples", label = tags$b("*Select samples"), 
                                                                           choices = list("All", "Healthy", "DMD"), 
-                                                                          selected = "Healthy")),
-                                                   column (4, selectInput("mRNA.corr.method", label = tags$b("Select correlation method"), 
+                                                                          selected = "All")),
+                                                   column (4, selectInput("mRNA.corr.method", label = tags$b("*Select correlation method"), 
                                                                           choices = list("pearson", "kendall", "spearman"), 
                                                                           selected = "spearman")),
-                                                   column (4, numericInput("mRNA.corr.threshold", label = tags$b("Select read threshold"), value = 50))),
+                                                   column (4, numericInput("mRNA.corr.threshold", label = tags$b("*Select read threshold"), value = 10))),
+                                          downloadButton("Exp_homemade_corr.mRNA.Download", "Download data"),
                                           plotlyOutput(outputId = "Exp_homemade_corr.mRNA")
                                         )), 
                                  column(6, 
@@ -113,15 +118,19 @@ fluidRow(column(12 ,
                                           title = "Bulk miR correlation" , status = "primary" , solidHeader = TRUE , width = 12 ,
                                           fluidRow(column (4, selectInput("miR.corr.samples", label = tags$b("Select samples"), 
                                                                           choices = list("All", "Healthy", "DMD"), 
-                                                                          selected = "Healthy")),
+                                                                          selected = "All")),
                                                    column (4, selectInput("miR.corr.method", label = tags$b("Select correlation method"), 
                                                                           choices = list("pearson", "kendall", "spearman"), 
                                                                           selected = "spearman")),
                                                    column (4, numericInput("miR.corr.threshold", label = tags$b("Select read threshold"), value = 5))),
+                                          downloadButton("Exp_homemade_corr.miR.Download", "Download data"),
                                           plotlyOutput(outputId = "Exp_homemade_corr.miR")
                                         )))
-                      )
-                    )
-                    ) ,  
-        use_bs_accordion_sidebar(),
-        p("*Data are normalised, centered and reduced.")))
+                      )),
+                      br(),
+                      p(icon("info-circle"), "Data are normalised, centered and reduced.", style = "color:#367FA9"),
+                      p(icon("exclamation-triangle"), "*Changing parameters will involve computing time and might take a while.", style = "color:#CB4A4A"),
+                      br()
+                      )),  
+        use_bs_accordion_sidebar()
+        ))

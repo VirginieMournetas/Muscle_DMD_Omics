@@ -1,6 +1,8 @@
+data.query <- reactiveValues()
+
 #### WINDOWS #### 
 
-#### plots window #### 
+#### plots window
 output$exp.homemade.graphs <- renderUI({
   exp1.Status()
   if(input$Product.type == "mRNA / Protein"){
@@ -50,7 +52,7 @@ output$exp.homemade.graphs <- renderUI({
   }
 })
 
-#### tables window #### 
+#### tables window
 output$exp.homemade.tables <- renderUI({
   exp1.Status()
   if(input$Product.type == "mRNA / Protein"){
@@ -158,20 +160,21 @@ output$Exp_homemade_table_uniqueProt <- DT::renderDataTable({
 
 #### PLOTS #### 
 
-# mRNA / miR plots
-
-####ALL GENE
-
-#PCA
+#### PCA - ALL GENE
 
 output$Exp_homemade_PCA.mRNA <- renderPlotly({
+  
+  if(input$mRNA.PCA.samples == "All" && input$mRNA.PCA.threshold == 10){
+    PCA.graph("mRNA",input$mRNA.PCA.samples, mRNA.PCs, input$mRNA.PCA.component1, input$mRNA.PCA.component2, input$mRNA.PCA.legend)
+  }else{
   
   withProgress(message = 'Generating PCA data', detail = "part 0", value = 0, {
     for (i in 1:3) {
       # Each time through the loop, add another row of data. This a stand-in
       # for a long-running computation.
       
-      graph2 <- PCA.graph("mRNA", mRNAseqData.short, input$mRNA.PCA.component1, input$mRNA.PCA.component2, as.integer(input$mRNA.PCA.legend), input$mRNA.PCA.threshold, input$mRNA.PCA.samples)
+      data.query$mRNA.PCs <- PCA.data("mRNA", mRNAseqData.short, input$mRNA.PCA.samples, input$mRNA.PCA.threshold)
+      graph2 <- PCA.graph("mRNA",input$mRNA.PCA.samples, data.query$mRNA.PCs, input$mRNA.PCA.component1, input$mRNA.PCA.component2, input$mRNA.PCA.legend)
 
       # Increment the progress bar, and update the detail text.
       incProgress(0.333, detail = paste("part", i))
@@ -180,40 +183,108 @@ output$Exp_homemade_PCA.mRNA <- renderPlotly({
       #Sys.sleep(0.1)
     }})
   
-  graph2       
+  graph2  
+  }
 })
+
+output$Exp_homemade_PCA.mRNA.Download <- downloadHandler(
+  filename = "PCA.mRNA.data.csv",
+  content = function(file) {
+    if(input$mRNA.PCA.samples == "All" && input$mRNA.PCA.threshold == 10){
+      write.csv(mRNA.PCs$ind$coord, file)}else{
+        write.csv(data.query$mRNA.PCs$ind$coord, file)}
+  }
+)
 
 output$Exp_homemade_PCA.miR <- renderPlotly({
-  PCA.graph("miR", miRseqData.short, input$miR.PCA.component1, input$miR.PCA.component2, as.integer(input$miR.PCA.legend), input$miR.PCA.threshold, input$miR.PCA.samples)
+  data.query$miR.PCs <- PCA.data("miR", miRseqData.short, input$miR.PCA.samples, input$miR.PCA.threshold)
+  PCA.graph("miR",input$miR.PCA.samples, data.query$miR.PCs, input$miR.PCA.component1, input$miR.PCA.component2, input$miR.PCA.legend)
 })
 
-#Correlations
+output$Exp_homemade_PCA.miR.Download <- downloadHandler(
+  filename = "PCA.miR.data.csv",
+  content = function(file) {
+    write.csv(data.query$miR.PCs$ind$coord, file)
+  }
+)
+
+#### Correlations - ALL GENE
 
 output$Exp_homemade_corr.mRNA <- renderPlotly({
   
-  withProgress(message = 'Generating correlation data', detail = "part 0", value = 0, {
-    for (i in 1:3) {
-      # Each time through the loop, add another row of data. This a stand-in
-      # for a long-running computation.
-      
-      graph <- Corr.graph(mRNAseqData.short, "mRNA", input$mRNA.corr.threshold, input$mRNA.corr.method, input$mRNA.corr.samples)
-      
-      # Increment the progress bar, and update the detail text.
-      incProgress(0.333, detail = paste("part", i))
-      
-      # Pause for 0.1 seconds to simulate a long computation.
-      #Sys.sleep(0.1)
-    }})
+  if (input$mRNA.corr.samples == "All" && input$mRNA.corr.threshold == 10 && input$mRNA.corr.method == "spearman"){
+
+    Corr.graph(mRNA.Corrs)
+    
+  }else{
   
-  graph  
+    withProgress(message = 'Generating correlation data', detail = "part 0", value = 0, {
+      for (i in 1:3) {
+        # Each time through the loop, add another row of data. This a stand-in
+        # for a long-running computation.
+        
+        data.query$mRNA.Corrs <- Corr.data(mRNAseqData.short, "mRNA", input$mRNA.corr.samples, input$mRNA.corr.threshold, input$mRNA.corr.method)
+        graph <- Corr.graph(data.query$mRNA.Corrs)
+ 
+        # Increment the progress bar, and update the detail text.
+        incProgress(0.333, detail = paste("part", i))
+        
+        # Pause for 0.1 seconds to simulate a long computation.
+        #Sys.sleep(0.1)
+      }})
+    
+    graph 
   
+  }
 })
+
+output$Exp_homemade_corr.mRNA.Download <- downloadHandler(
+  filename = "Correlation.mRNA.data.csv",
+  content = function(file) {
+    if (input$mRNA.corr.samples == "All" && input$mRNA.corr.threshold == 10 && input$mRNA.corr.method == "spearman"){
+      write.csv(mRNA.Corrs, file)}else{write.csv(data.query$mRNA.corrs, file)}
+  }
+)
 
 output$Exp_homemade_corr.miR <- renderPlotly({
-  Corr.graph(miRseqData.short, "miR", input$miR.corr.threshold, input$miR.corr.method, input$miR.corr.samples)
+  data.query$miR.Corrs <- Corr.data(miRseqData.short, "miR", input$miR.corr.samples, input$miR.corr.threshold, input$miR.corr.method)
+  Corr.graph(data.query$miR.Corrs)
 })
 
-####SINGLE GENE
+output$Exp_homemade_corr.miR.Download <- downloadHandler(
+  filename = "Correlation.miR.data.csv",
+  content = function(file) {
+    Correlation.data <- data.query$miR.Corrs
+    write.csv(Correlation.data, file)
+  }
+)
+
+####Single-cell mRNA - ALL GENE
+output$Exp_homemade_SingleCell.reduc <- renderPlotly({
+  DimPlot(object = singlecell, 
+          reduction = input$SingleCell.reduction,
+          dims = c(input$SingleCell.component1, input$SingleCell.component2),
+          label = FALSE,
+          cols =  '#9ED93B'
+  ) + NoLegend()
+  ggplotly(p = ggplot2::last_plot() , 
+           width = NULL , 
+           height = NULL , 
+           tooltip = "all" , 
+           dynamicTicks = FALSE , 
+           layerData = 1 , 
+           originalData = TRUE , 
+           source = "A") %>% layout(margin = m)
+})
+
+output$Exp_homemade_SingleCell.reduc.Download <- downloadHandler(
+  filename = "SingleCell.rds",
+  content = function(file) {
+    saveRDS(singlecell, file)
+  }
+)
+
+##### mRNA / miR plots - SINGLE GENE
 output$Exp_homemade_Graph_plot1 <- renderPlotly({
   
   exp1.Status()
@@ -248,8 +319,7 @@ output$Exp_homemade_Graph_plot1 <- renderPlotly({
   }   
 })
 
-
-# Protein plot
+##### Protein plot - SINGLE GENE
 output$Exp_homemade_Graph_plot2 <- renderPlotly({
     
     exp1.Status()
@@ -293,28 +363,8 @@ output$Exp_homemade_Graph_plot2 <- renderPlotly({
     }
     
   })
-  
 
-# Single-cell mRNA plots
-
-####ALL GENE
-output$Exp_homemade_SingleCell.reduc <- renderPlotly({
-  DimPlot(object = singlecell, 
-          reduction = input$SingleCell.reduction,
-          dims = c(input$SingleCell.component1, input$SingleCell.component2),
-          cols =  '#9ED93B'
-  )
-  ggplotly(p = ggplot2::last_plot() , 
-           width = NULL , 
-           height = NULL , 
-           tooltip = "all" , 
-           dynamicTicks = FALSE , 
-           layerData = 1 , 
-           originalData = TRUE , 
-           source = "A") %>% layout(margin = m)
-  })
-
-####SINGLE GENE
+#### Single-cell mRNA - SINGLE GENE
 output$Exp_homemade_Graph_plot3 <- renderPlotly({
   
   withProgress(message = 'Generating data', detail = "part 0", value = 0, {
