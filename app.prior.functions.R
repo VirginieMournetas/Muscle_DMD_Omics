@@ -593,7 +593,7 @@ Corr.graph <- function(CorrData){
                tickvals = y_grid)
   
   
-  fig <- plot_ly(data = plotdata, height = 550)
+  fig <- plot_ly(data = plotdata, height = 525)
   
   fig <- fig %>% add_trace(x = ~Var2, y = ~Var1, type = "scatter", mode = "markers",
                            color = ~value,
