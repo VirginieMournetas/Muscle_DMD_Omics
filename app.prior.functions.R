@@ -71,6 +71,48 @@ Infos <- function (Product.type, ID.selected, ID.type, con){
   return(res2)
 }
 
+Infos2 <- function (Product.type, ID.selected, ID.type){
+  
+  if (Product.type == "miR"){
+    IDs.db <- human.mir.IDs.final
+  }else if(Product.type == "mRNA / Protein"){
+    IDs.db <- human.genes.IDs.final
+  }
+  
+  if(ID.type == "EntrezGene ID"){
+    ID.type <- "entrezgeneid"
+  }else if(ID.type == "Ensembl ID"){
+    ID.type <- "ensembl"
+  }else if(ID.type == "Official Symbol"){
+    ID.type <- "symbol"
+  }else if(ID.type == "Official Name"){
+    ID.type <- "name"
+  }else if(ID.type == "Uniprot ID"){
+    ID.type <- "uniprot"
+  }else if(ID.type == "mirBase ID"){
+    ID.type <- "human_mirbase_id"
+  }else if(ID.type == "mirBase Name"){
+    ID.type <- "human_mirbase_name"
+  }
+  
+  query <- unique(IDs.db[IDs.db[[ID.type]] == ID.selected,])
+  query <- query[rowSums(is.na(query)) != ncol(query), ]
+  
+  for (i in c(1:length(names(query)))){
+    query[,i] <- as.character(query[,i])
+  }
+  query$entrezgeneid <- as.integer(query$entrezgeneid)
+
+  query.data <- NULL
+  for (i in c(1:length(names(query)))){
+    query.data <- c(query.data , list(unique(query[,i])))
+  }
+  names(query.data) <- names(query)
+  
+  return(query.data)
+  
+}
+
 db_Links <- function (Product.type, Infos){ #need to deal with multiple 
   links_list <- data.frame(matrix(NA, ncol =3, nrow = 25))
   links_list[1,3] <- paste0("https://www.genecards.org/cgi-bin/carddisp.pl?gene=" , Infos$symbol[1]) #genecards
@@ -365,13 +407,15 @@ Graph_view <- function(input_RNA_Graph, UniqueRNAData_sorted, UniqueRNAmeanData,
 #Single-cell graph
 SC_datacount <- function(matrix, gene){
   
-  data <- c(sum(matrix[gene, ] == 0),
-            sum(matrix[gene, ] != 0),
-            sum(matrix[gene, ] == 1),
-            sum(matrix[gene, ] >= 2),
-            sum(matrix[gene, ] >= 5))
+  gene.DATA <- matrix[gene, ] 
   
-  table = data.frame( gene = data)
+  data <- c(sum(gene.DATA == 0),
+            sum(gene.DATA != 0),
+            sum(gene.DATA == 1),
+            sum(gene.DATA >= 2),
+            sum(gene.DATA >= 5))
+  
+  table <- data.frame(gene = data)
   colnames(table) <- gene
   rownames(table) <- c("== 0","!= 0","== 1",">= 2",">= 5")
   

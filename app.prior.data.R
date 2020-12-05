@@ -27,6 +27,14 @@ for (name in Data.files){
   var <- as.symbol(str_replace(name, ".csv", ""))
 }
 
+Data.files <- c("human.mir.IDs.final.csv", "human.genes.IDs.final.csv")
+
+for (name in Data.files){
+  var <- assign(str_replace(name, ".csv", ""), read.table(file.path(dir["Data"], name), sep = "\t", header = TRUE))
+  colnames(var) <- string.for.sql(var)
+  var <- as.symbol(str_replace(name, ".csv", ""))
+}
+
 Tables.files <- c("UniquemRNAData.csv", "UniquemiRData.csv", 
                   "UniquemRNAmeanData.csv", "UniquemiRmeanData.csv", 
                   "mRNA_RatioStat_Data_Myogenesis.csv", "miR_RatioStat_Data_Myogenesis.csv", 
@@ -81,6 +89,12 @@ UniquemiRData[ , 8] <- factor(UniquemiRData[ , 8],
 #mRNA PCA & correlation data
 mRNA.PCs <- readRDS(file = file.path(dir["Data"], "mRNA.PCs.rds"))
 mRNA.Corrs <- readRDS(file = file.path(dir["Data"], "mRNA.Corrs.rds"))
+
+mRNA.healthy.PCs <- readRDS(file = file.path(dir["Data"], "mRNA.healthy.PCs.rds"))
+mRNA.healthy.Corrs <- readRDS(file = file.path(dir["Data"], "mRNA.healthy.Corrs.rds"))
+
+mRNA.DMD.PCs <- readRDS(file = file.path(dir["Data"], "mRNA.DMD.PCs.rds"))
+mRNA.DMD.Corrs <- readRDS(file = file.path(dir["Data"], "mRNA.DMD.Corrs.rds"))
 
 #Single-cell data
 singlecell.matrix <- readRDS(file = file.path(dir["Data"], "singlecell.matrix.rds"))

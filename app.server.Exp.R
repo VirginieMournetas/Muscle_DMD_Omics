@@ -1,4 +1,5 @@
 id.query <- reactiveValues()
+data.query <- reactiveValues()
 
 #### ID list #### 
 output$Product.select <- renderUI({
@@ -45,8 +46,17 @@ exp1.Status <- eventReactive(input$display, { #reactive({
     id.query$ID.selected <- toupper(input$ID.selected)
   }else{id.query$ID.selected <- input$ID.selected}
   
-  id.query$Id.data <- Infos(input$Product.type, id.query$ID.selected, input$ID.type, con)
+  id.query$Id.data <- Infos2(input$Product.type, id.query$ID.selected, input$ID.type)
   
+  if(input$Product.type == "miR"){
+    data.query$UniquemiRData <- Graph1_2_table.b(miRseqData.short, UniquemiRData, "miR", id.query$Id.data, input$ID.type)
+    data.query$miR_RatioStat_Data_Myogenesis <- Graph4_to_7_table(miR_RatioStat_Data_Myogenesis, miR_Ratios_Stats.short, "miR", id.query$Id.data, "MYOGENESIS")
+    data.query$miR_RatioStat_Data_Phenotype <- Graph4_to_7_table(miR_RatioStat_Data_Phenotype, miR_Ratios_Stats.short, "miR", id.query$Id.data, "PHENOTYPE")
+  }else if(input$Product.type == "mRNA / Protein"){
+    data.query$UniquemRNAData <- Graph1_2_table.b(mRNAseqData.short, UniquemRNAData, "mRNA", id.query$Id.data, input$ID.type)
+    data.query$mRNA_RatioStat_Data_Myogenesis <- Graph4_to_7_table(mRNA_RatioStat_Data_Myogenesis, mRNA_Ratios_Stats.short, "mRNA", id.query$Id.data, "MYOGENESIS")
+    data.query$mRNA_RatioStat_Data_Phenotype <- Graph4_to_7_table(mRNA_RatioStat_Data_Phenotype, mRNA_Ratios_Stats.short, "mRNA", id.query$Id.data, "PHENOTYPE")
+  }
 })
 
 #### mRNA db links #### 

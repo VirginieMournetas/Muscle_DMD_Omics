@@ -1,12 +1,5 @@
-#options(repos = BiocManager::repositories())
-#getOption("repos")
-
 requiredLib <- c(
   "shiny",
-  #"BiocManager",
-  #"Biobase", 
-  #"devtools",
-  "RMySQL",
   "sctransform",
   "shinydashboard",
   "shinydashboardPlus",
@@ -19,7 +12,7 @@ requiredLib <- c(
   "DBI", #For file gestion & postgreSQL
   "fs", #For file gestion
   "shinyFiles", #For file gestion
-  "RMySQL", #for mySQL
+  #"RMySQL", #for mySQL
   "htmltools",
   "ggplot2", #For plots
   "plotly", #For plots
@@ -32,9 +25,9 @@ requiredLib <- c(
   "Seurat" #Single-cell
 ) 
 for (lib in requiredLib) {
-  #if (!require(lib, character.only = TRUE)) {
-    #install.packages(lib,repos = "http://cran.us.r-project.org")
-  #}
+  if (!require(lib, character.only = TRUE)) {
+    install.packages(lib,repos = "http://cran.us.r-project.org")
+  }
   require(lib, character.only = TRUE)
 }
 

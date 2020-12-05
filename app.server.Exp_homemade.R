@@ -1,5 +1,3 @@
-data.query <- reactiveValues()
-
 #### WINDOWS #### 
 
 #### plots window
@@ -89,8 +87,22 @@ output$exp.homemade.tables <- renderUI({
 
 #mRNA datatable
 output$Homemade_mRNA_table <- DT::renderDataTable({
-  table <- mRNAseqData.full %>% select(one_of(input$mRNAseqData.selected.columns))
-  Render_Table(unique(table))
+  
+  withProgress(message = 'Generating table data', detail = "part 0", value = 0, {
+    for (i in 1:2) {
+      # Each time through the loop, add another row of data. This a stand-in
+      # for a long-running computation.
+      
+      table <- mRNAseqData.full %>% select(one_of(input$mRNAseqData.selected.columns))
+      Ready.table <- Render_Table(unique(table))
+      # Increment the progress bar, and update the detail text.
+      incProgress(0.5, detail = paste("part", i))
+      
+      # Pause for 0.1 seconds to simulate a long computation.
+      #Sys.sleep(0.1)
+    }})
+  
+  Ready.table
   #Render_Table(SQL_Table("mRNAseqData"))
 })
 
@@ -118,29 +130,23 @@ output$Exp_homemade_table_unique <- DT::renderDataTable({
   if(input$Product.type == "miR"){
     
     if (input$Unique_table_type == 1){
-      UniquemiRData <- Graph1_2_table.b(miRseqData.short, UniquemiRData, "miR", id.query$Id.data, input$ID.type)
-      Render_Table(UniquemiRData[c(1:4,6)])
+      Render_Table(data.query$UniquemiRData[c(1:4,6)])
     }
     else if (input$Unique_table_type == 2){
-      miR_RatioStat_Data_Myogenesis <- Graph4_to_7_table(miR_RatioStat_Data_Myogenesis, miR_Ratios_Stats.short, "miR", id.query$Id.data, "MYOGENESIS")
-      Render_Table(miR_RatioStat_Data_Myogenesis)
+      Render_Table(data.query$miR_RatioStat_Data_Myogenesis)
     }
     else if (input$Unique_table_type == 3){
-      miR_RatioStat_Data_Phenotype <- Graph4_to_7_table(miR_RatioStat_Data_Phenotype, miR_Ratios_Stats.short, "miR", id.query$Id.data, "PHENOTYPE")
-      Render_Table(miR_RatioStat_Data_Phenotype)
+      Render_Table(data.query$miR_RatioStat_Data_Phenotype)
     }
     
   }else if(input$Product.type == "mRNA / Protein"){
     
     if (input$Unique_table_type == 1){
-      UniquemRNAData <- Graph1_2_table.b(mRNAseqData.short, UniquemRNAData, "mRNA", id.query$Id.data, input$ID.type)
-      Render_Table(UniquemRNAData[c(1:4,6)])
+      Render_Table(data.query$UniquemRNAData[c(1:4,6)])
     }else if (input$Unique_table_type == 2){
-      mRNA_RatioStat_Data_Myogenesis <- Graph4_to_7_table(mRNA_RatioStat_Data_Myogenesis, mRNA_Ratios_Stats.short, "mRNA", id.query$Id.data, "MYOGENESIS")
-      Render_Table(mRNA_RatioStat_Data_Myogenesis)
+      Render_Table(data.query$mRNA_RatioStat_Data_Myogenesis)
     }else if (input$Unique_table_type == 3){
-      mRNA_RatioStat_Data_Phenotype <- Graph4_to_7_table(mRNA_RatioStat_Data_Phenotype, mRNA_Ratios_Stats.short, "mRNA", id.query$Id.data, "PHENOTYPE")
-      Render_Table(mRNA_RatioStat_Data_Phenotype)
+      Render_Table(data.query$mRNA_RatioStat_Data_Phenotype)
     }
   }
 })
@@ -157,15 +163,21 @@ output$Exp_homemade_table_uniqueProt <- DT::renderDataTable({
 })
 
 
-
 #### PLOTS #### 
 
-#### PCA - ALL GENE
+#### PCA - ALL GENE #### 
 
 output$Exp_homemade_PCA.mRNA <- renderPlotly({
   
-  if(input$mRNA.PCA.samples == "All" && input$mRNA.PCA.threshold == 10){
-    PCA.graph("mRNA",input$mRNA.PCA.samples, mRNA.PCs, input$mRNA.PCA.component1, input$mRNA.PCA.component2, input$mRNA.PCA.legend)
+  if(input$mRNA.PCA.threshold == 10){
+    if(input$mRNA.PCA.samples == "All"){
+      PCA.graph("mRNA",input$mRNA.PCA.samples, mRNA.PCs, input$mRNA.PCA.component1, input$mRNA.PCA.component2, input$mRNA.PCA.legend)
+    }else if(input$mRNA.PCA.samples == "Healthy"){
+      PCA.graph("mRNA",input$mRNA.PCA.samples, mRNA.healthy.PCs, input$mRNA.PCA.component1, input$mRNA.PCA.component2, input$mRNA.PCA.legend)
+    }else if(input$mRNA.PCA.samples == "DMD"){
+      PCA.graph("mRNA",input$mRNA.PCA.samples, mRNA.DMD.PCs, input$mRNA.PCA.component1, input$mRNA.PCA.component2, input$mRNA.PCA.legend)
+    }
+    
   }else{
   
   withProgress(message = 'Generating PCA data', detail = "part 0", value = 0, {
@@ -188,7 +200,7 @@ output$Exp_homemade_PCA.mRNA <- renderPlotly({
 })
 
 output$Exp_homemade_PCA.mRNA.Download <- downloadHandler(
-  filename = "PCA.mRNA.data.csv",
+  filename = paste0("PCA.mRNA.", input$mRNA.PCA.samples, "(",input$mRNA.PCA.threshold ,")data.csv"),
   content = function(file) {
     if(input$mRNA.PCA.samples == "All" && input$mRNA.PCA.threshold == 10){
       write.csv(mRNA.PCs$ind$coord, file)}else{
@@ -202,19 +214,24 @@ output$Exp_homemade_PCA.miR <- renderPlotly({
 })
 
 output$Exp_homemade_PCA.miR.Download <- downloadHandler(
-  filename = "PCA.miR.data.csv",
+  filename = paste0("PCA.miR.", input$miR.PCA.samples, "(", input$miR.PCA.threshold,")data.csv"),
   content = function(file) {
     write.csv(data.query$miR.PCs$ind$coord, file)
   }
 )
 
-#### Correlations - ALL GENE
+#### Correlations - ALL GENE #### 
 
 output$Exp_homemade_corr.mRNA <- renderPlotly({
   
-  if (input$mRNA.corr.samples == "All" && input$mRNA.corr.threshold == 10 && input$mRNA.corr.method == "spearman"){
-
-    Corr.graph(mRNA.Corrs)
+  if (input$mRNA.corr.threshold == 10 && input$mRNA.corr.method == "spearman"){
+      if(input$mRNA.corr.samples == "All"){
+        Corr.graph(mRNA.Corrs)
+      }else if(input$mRNA.corr.samples == "Healthy"){
+        Corr.graph(mRNA.healthy.Corrs)
+      }else if(input$mRNA.corr.samples == "DMD"){
+        Corr.graph(mRNA.DMD.Corrs)
+      }
     
   }else{
   
@@ -239,7 +256,7 @@ output$Exp_homemade_corr.mRNA <- renderPlotly({
 })
 
 output$Exp_homemade_corr.mRNA.Download <- downloadHandler(
-  filename = "Correlation.mRNA.data.csv",
+  filename = paste0("Correlation.mRNA.", input$mRNA.corr.samples, "(",input$mRNA.corr.threshold , "_", input$mRNA.corr.method,")data.csv"),
   content = function(file) {
     if (input$mRNA.corr.samples == "All" && input$mRNA.corr.threshold == 10 && input$mRNA.corr.method == "spearman"){
       write.csv(mRNA.Corrs, file)}else{write.csv(data.query$mRNA.corrs, file)}
@@ -252,14 +269,14 @@ output$Exp_homemade_corr.miR <- renderPlotly({
 })
 
 output$Exp_homemade_corr.miR.Download <- downloadHandler(
-  filename = "Correlation.miR.data.csv",
+  filename = paste0("Correlation.miR.", input$miR.corr.samples, "(",input$miR.corr.threshold , "_", input$miR.corr.method,")data.csv"),
   content = function(file) {
     Correlation.data <- data.query$miR.Corrs
     write.csv(Correlation.data, file)
   }
 )
 
-####Single-cell mRNA - ALL GENE
+#### Single-cell mRNA - ALL GENE #### 
 output$Exp_homemade_SingleCell.reduc <- renderPlotly({
   DimPlot(object = singlecell, 
           reduction = input$SingleCell.reduction,
@@ -284,42 +301,34 @@ output$Exp_homemade_SingleCell.reduc.Download <- downloadHandler(
   }
 )
 
-##### mRNA / miR plots - SINGLE GENE
+#### mRNA / miR plots - SINGLE GENE #### 
 output$Exp_homemade_Graph_plot1 <- renderPlotly({
   
   exp1.Status()
   
   if(input$Product.type == "miR"){
     
-    UniquemiRData <- Graph1_2_table.b(miRseqData.short, UniquemiRData, "miR", id.query$Id.data, input$ID.type)
-    UniquemiRData_sorted <- UniquemiRData[order(UniquemiRData$Cell_line) , ]
+    UniquemiRData_sorted <- data.query$UniquemiRData[order(data.query$UniquemiRData$Cell_line) , ]
     UniquemiRData_sorted <- UniquemiRData_sorted[order(UniquemiRData_sorted$Phenotype) , ]
     UniquemiRData_sorted <- UniquemiRData_sorted[order(UniquemiRData_sorted$Cell_stage) , ]
     
     UniquemiRmeanData <- Graph3_table.b(UniquemiRData, UniquemiRmeanData, "miR")
     
-    miR_RatioStat_Data_Myogenesis <- Graph4_to_7_table(miR_RatioStat_Data_Myogenesis, miR_Ratios_Stats.short, "miR", id.query$Id.data, "MYOGENESIS")
-    miR_RatioStat_Data_Phenotype <- Graph4_to_7_table(miR_RatioStat_Data_Phenotype, miR_Ratios_Stats.short, "miR", id.query$Id.data, "PHENOTYPE")
-    
-    Graph_view(input$Exp_homemade_Graph, UniquemiRData_sorted, UniquemiRmeanData, id.query$ID.selected, miR_RatioStat_Data_Myogenesis, miR_RatioStat_Data_Phenotype)
+    Graph_view(input$Exp_homemade_Graph, UniquemiRData_sorted, UniquemiRmeanData, id.query$ID.selected, data.query$miR_RatioStat_Data_Myogenesis, data.query$miR_RatioStat_Data_Phenotype)
     
   }else if(input$Product.type == "mRNA / Protein"){
     
-    UniquemRNAData <- Graph1_2_table.b(mRNAseqData.short, UniquemRNAData, "mRNA", id.query$Id.data, input$ID.type)
-    UniquemRNAData_sorted <- UniquemRNAData[order(UniquemRNAData$Cell_line), ]
+    UniquemRNAData_sorted <- data.query$UniquemRNAData[order(data.query$UniquemRNAData$Cell_line), ]
     UniquemRNAData_sorted <- UniquemRNAData_sorted[order(UniquemRNAData_sorted$Phenotype) , ]
     UniquemRNAData_sorted <- UniquemRNAData_sorted[order(UniquemRNAData_sorted$Cell_stage) , ]
     
     UniquemRNAmeanData <- Graph3_table.b(UniquemRNAData, UniquemRNAmeanData, "mRNA")
     
-    mRNA_RatioStat_Data_Myogenesis <- Graph4_to_7_table(mRNA_RatioStat_Data_Myogenesis, mRNA_Ratios_Stats.short, "mRNA", id.query$Id.data, "MYOGENESIS")
-    mRNA_RatioStat_Data_Phenotype <- Graph4_to_7_table(mRNA_RatioStat_Data_Phenotype, mRNA_Ratios_Stats.short, "mRNA", id.query$Id.data, "PHENOTYPE")
-    
-    Graph_view(input$Exp_homemade_Graph, UniquemRNAData_sorted, UniquemRNAmeanData, id.query$ID.selected, mRNA_RatioStat_Data_Myogenesis, mRNA_RatioStat_Data_Phenotype)
+    Graph_view(input$Exp_homemade_Graph, UniquemRNAData_sorted, UniquemRNAmeanData, id.query$ID.selected, data.query$mRNA_RatioStat_Data_Myogenesis, data.query$mRNA_RatioStat_Data_Phenotype)
   }   
 })
 
-##### Protein plot - SINGLE GENE
+#### Protein plot - SINGLE GENE #### 
 output$Exp_homemade_Graph_plot2 <- renderPlotly({
     
     exp1.Status()
@@ -364,11 +373,11 @@ output$Exp_homemade_Graph_plot2 <- renderPlotly({
     
   })
 
-#### Single-cell mRNA - SINGLE GENE
+#### Single-cell mRNA - SINGLE GENE #### 
 output$Exp_homemade_Graph_plot3 <- renderPlotly({
   
   withProgress(message = 'Generating data', detail = "part 0", value = 0, {
-    for (i in 1:2) {
+    for (i in 1:3) {
       # Each time through the loop, add another row of data. This a stand-in
       # for a long-running computation.
       
@@ -381,7 +390,7 @@ output$Exp_homemade_Graph_plot3 <- renderPlotly({
       ) %>% layout(title = id.query$ID.selected, xaxis = list(title = "Number of reads"), yaxis = list(title = "Number of cells"), margin = m)
       
       # Increment the progress bar, and update the detail text.
-      incProgress(0.5, detail = paste("part", i))
+      incProgress(0.333, detail = paste("part", i))
       
       # Pause for 0.1 seconds to simulate a long computation.
       #Sys.sleep(0.1)
