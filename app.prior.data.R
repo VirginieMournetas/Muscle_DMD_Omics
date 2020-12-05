@@ -8,8 +8,8 @@ string.for.sql <- function(file){
 
 #### SQL DB ####
 
-source(file.path(dir["base"], "db.R"), local = TRUE, encoding = "UTF-8")
-con <- c(db, host_db, db_port, db_user, db_password)
+#source(file.path(dir["base"], "db.R"), local = TRUE, encoding = "UTF-8")
+#con <- c(db, host_db, db_port, db_user, db_password)
 
 #### Files ####
 
