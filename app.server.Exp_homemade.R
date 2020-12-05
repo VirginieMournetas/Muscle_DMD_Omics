@@ -166,11 +166,6 @@ output$Exp_homemade_table_uniqueProt <- DT::renderDataTable({
 #### PLOTS #### 
 
 #### PCA - ALL GENE #### 
-withProgress(message = 'Generating plots', detail = "part 0", value = 0, {
-  for (i in 1:3) {
-    # Each time through the loop, add another row of data. This a stand-in
-    # for a long-running computation.
-    
 
 output$Exp_homemade_PCA.mRNA <- renderPlotly({
   
