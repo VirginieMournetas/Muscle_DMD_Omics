@@ -1,7 +1,7 @@
 #rm(list =ls())
 #setwd("/home/virginie/shared/Muscle_DMD_Omics")
 #setwd("/src/shiny-server/Muscle_DMD_Omics")
-#setwd("./")
+setwd("./")
 
 Last_Update <- "08/12/20"
 
