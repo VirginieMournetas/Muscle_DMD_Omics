@@ -6,6 +6,11 @@ string.for.sql <- function(file){
   return(names)
 }
 
+#### Rmarkdown ####
+
+rmdfiles <- c("app.sharing.rmd")
+#sapply(rmdfiles, knit, quiet = F)
+
 #### SQL DB ####
 
 #source(file.path(dir["base"], "db.R"), local = TRUE, encoding = "UTF-8")

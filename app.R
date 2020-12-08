@@ -1,9 +1,9 @@
 #rm(list =ls())
 #setwd("/home/virginie/shared/Muscle_DMD_Omics")
 #setwd("/src/shiny-server/Muscle_DMD_Omics")
-#setwd("./")
+setwd("./")
 
-Last_Update <- "05/12/20"
+Last_Update <- "08/12/20"
 
 
 #### FOLDERS #### 
@@ -13,7 +13,7 @@ source("app.prior.folders.R", local = TRUE, encoding = "UTF-8")
 source(file.path(dir["base"], "app.prior.libraries.R"), local = TRUE, encoding = "UTF-8")
 
 #### DATA ####
-source(file.path(dir["base"], "app.prior.data.R"), local = TRUE, encoding = "UTF-8")
+#source(file.path(dir["base"], "app.prior.data.R"), local = TRUE, encoding = "UTF-8")
 
 #### FUNCTIONS ####
 source(file.path(dir["base"], "app.prior.functions.R"), local = TRUE, encoding = "UTF-8")
@@ -41,6 +41,7 @@ ui <- dashboardPagePlus(skin = "black" ,
                             menuItem("Home" , tabName = "Home" , icon = icon("home")) , 
                             menuItem("Data presentation" , tabName = "Data" , icon = icon("microscope")),
                             menuItem("Expression data" , tabName = "Exp" , icon = icon("chart-bar")),
+                            menuItem("Download the app" , tabName = "Download" , icon = icon("download")),
                             menuItem("References" , tabName = "Ref" , icon = icon("atlas")), 
                             menuItem("Contact" , tabName = "Contact" , icon = icon("marker"))
                           )
@@ -55,7 +56,7 @@ ui <- dashboardPagePlus(skin = "black" ,
                             
                             # Tab.Home ####
                             tabItem(tabName = "Home", 
-                                    p()),
+                                    source(file.path(dir["base"], "app.ui.Home.R"), local = TRUE)$value),
                             
                             # Tab.Data ####
                             tabItem(tabName = "Data", 
@@ -85,9 +86,16 @@ ui <- dashboardPagePlus(skin = "black" ,
                                       tabPanel(p(icon("chart-bar") , tags$b("Single-gene expression data") , style = "color:#367FA9"), source(file.path(dir["base"], "app.ui.Exp3.R"), local = TRUE)$value))),
                             
                             
+                            # Tab.Download ####
+                            tabItem(tabName = "Download", 
+                                    #withMathJax(includeMarkdown("app.sharing.rmd")),
+                                    includeHTML('app.sharing.html')),
+                            
                             # Tab.Ref ####
                             tabItem(tabName = "Ref",
-                                    p(source(file.path(dir["base"],"app.ui.Ref.01.R"), local = TRUE)$value,
+                                    p(h4(tags$b("You use data or code from this app in your research"), "- Please cite the following paper:", style = "color:#367FA9"),
+                                      br(),
+                                      source(file.path(dir["base"],"app.ui.Ref.01.R"), local = TRUE)$value,
                                       source(file.path(dir["base"],"app.ui.Ref.02.R"), local = TRUE)$value)), 
                             
                             # Tab.Contact ####

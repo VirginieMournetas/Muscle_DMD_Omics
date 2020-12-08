@@ -22,7 +22,8 @@ requiredLib <- c(
   "data.table", #Correlations
   "jsonlite", #API
   "httr", #API
-  "Seurat" #Single-cell
+  "Seurat", #Single-cell
+  "knitr" #rmarkdown
 ) 
 for (lib in requiredLib) {
   if (!require(lib, character.only = TRUE)) {

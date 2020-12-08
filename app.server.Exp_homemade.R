@@ -95,6 +95,7 @@ output$Homemade_mRNA_table <- DT::renderDataTable({
       
       table <- mRNAseqData.full %>% select(one_of(input$mRNAseqData.selected.columns))
       Ready.table <- Render_Table(unique(table))
+     
       # Increment the progress bar, and update the detail text.
       incProgress(0.5, detail = paste("part", i))
       
@@ -220,6 +221,32 @@ output$Exp_homemade_PCA.miR.Download <- downloadHandler(
   }
 )
 
+
+#### Clustering - ALL GENE #### 
+output$Exp_homemade_clust.mRNA <- renderPlot({
+  data.query$mRNA.Clust <- Clust.data(mRNAseqData.short, "mRNA", input$mRNA.clust.samples, input$mRNA.clust.threshold, input$mRNA.clust.dist, input$mRNA.clust.clust)
+  Clust.graph(data.query$mRNA.Clust)
+})
+
+output$Exp_homemade_clust.mRNA.Download <- downloadHandler(
+  filename = paste0("Clustering.mRNA.", input$mRNA.clust.samples, "(",input$mRNA.clust.threshold , "_", input$mRNA.clust.dist,"_", input$mRNA.clust.clust,")data.rds"),
+  content = function(file) {
+    saveRDS(Clust.data, file)
+  }
+)
+
+output$Exp_homemade_clust.miR <- renderPlot({
+  data.query$miR.Clust <- Clust.data(miRseqData.short, "miR", input$miR.clust.samples, input$miR.clust.threshold, input$miR.clust.dist, input$miR.clust.clust)
+  Clust.graph(data.query$miR.Clust)
+})
+
+output$Exp_homemade_clust.miR.Download <- downloadHandler(
+  filename = paste0("Clustering.miR.", input$miR.clust.samples, "(",input$miR.clust.threshold , "_", input$miR.clust.dist,"_", input$miR.clust.clust,")data.rds"),
+  content = function(file) {
+    saveRDS(Clust.data, file)
+  }
+)
+
 #### Correlations - ALL GENE #### 
 
 output$Exp_homemade_corr.mRNA <- renderPlotly({
@@ -278,20 +305,22 @@ output$Exp_homemade_corr.miR.Download <- downloadHandler(
 
 #### Single-cell mRNA - ALL GENE #### 
 output$Exp_homemade_SingleCell.reduc <- renderPlotly({
-  DimPlot(object = singlecell, 
-          reduction = input$SingleCell.reduction,
-          dims = c(input$SingleCell.component1, input$SingleCell.component2),
-          label = FALSE,
-          cols =  '#9ED93B'
-  ) + NoLegend()
-  ggplotly(p = ggplot2::last_plot() , 
-           width = NULL , 
-           height = NULL , 
-           tooltip = "all" , 
-           dynamicTicks = FALSE , 
-           layerData = 1 , 
-           originalData = TRUE , 
-           source = "A") %>% layout(margin = m)
+
+    DimPlot(object = singlecell, 
+            reduction = input$SingleCell.reduction,
+            dims = c(input$SingleCell.component1, input$SingleCell.component2),
+            label = FALSE,
+            cols =  '#9ED93B'
+    ) + NoLegend()
+    ggplotly(p = ggplot2::last_plot() , 
+             width = NULL , 
+             height = NULL , 
+             tooltip = "all" , 
+             dynamicTicks = FALSE , 
+             layerData = 1 , 
+             originalData = TRUE , 
+             source = "A") %>% layout(margin = m)
+  
 })
 
 output$Exp_homemade_SingleCell.reduc.Download <- downloadHandler(

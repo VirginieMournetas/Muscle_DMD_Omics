@@ -1,6 +1,8 @@
 fluidRow(
   column(3) ,
   column(6 , 
+         h3(tags$b("You like this app", icon("thumbs-up")),style = "color:#367FA9 ; text-align:center"),
+         p(tags$b(icon("share-alt"),"Share it & ", icon("smile"),"Tell me"), style = "color:#367FA9 ; text-align:center"),
          box( #email
            width = 12 ,      
            title = p(icon("envelope") , tags$b("By email")) ,

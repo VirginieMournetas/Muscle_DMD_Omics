@@ -444,7 +444,7 @@ PCA.data <- function(Datatype , Data, samples.select, threshold){
     }
   }
   
-  data.to.transform <- Data[apply(Data[,c(1,samples)], 1, max) >= threshold,] 
+  data.to.transform <- Data[apply(Data[,c(samples)], 1, max) >= threshold,] 
   expr.PCs <- PCA(t(data.to.transform[, samples]), scale.unit = TRUE, ncp = 6, graph = FALSE)
   return(expr.PCs)
 }
@@ -491,6 +491,56 @@ PCA.graph <- function(Datatype , samples.select, expr.PCs, x, y, color){
   fig
 }
 
+#Clustering data
+Clust.data <- function(Data, Datatype, samples.select, threshold, distance, clustering){
+  #	"euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski", "pearson", "spearman" or "kendall".
+  # "ward.D", "ward.D2", "single", "complete", "average" (= UPGMA), "mcquitty" (= WPGMA), "median" (= WPGMC) or "centroid" (= UPGMC).
+  if (Datatype == "miR"){
+    p <- 43
+    v <- seq(2,43,3)}else if(Datatype == "mRNA"){
+      p <- 103
+      v <- c(seq(2,13,3), seq(14,103,9))}
+  
+  if (samples.select == "All"){samples <- c(2:p)}else{
+    if (samples.select == "Healthy"){
+      j <- 1
+    }else if(samples.select == "DMD"){
+      j <- 2 
+    }
+    samples <- c()
+    for (i in c(1:7)){
+      if(j == 14){k <- p}else{k <- v[j+1]-1}
+      samples <- c(samples, v[j]: k)
+      j <- j +2
+    }
+  }
+  data.to.transform <- Data[apply(Data[,c(samples)], 1, max) >= threshold,] 
+  my_data <- t(data.to.transform[, samples]) %>%
+    na.omit() %>%          # Remove missing values (NA)
+    scale()                # Scale variables
+  dist <- get_dist(my_data, method = distance) 
+  clustData <- hclust(dist, method = clustering)
+  
+  return(clustData)
+  
+}
+#Clustering graph
+Clust.graph <- function(clustData){
+  as.dendrogram(clustData) %>%
+    fviz_dend(k = 7, # Cut in four groups
+              cex = 0.7, # label size
+              k_colors = c("#f55742", "#f59942", "#8df542", "#42f5b6", "#4272f5", "#9c42f5", "#f542a1"),
+              horiz = FALSE,
+              repel = TRUE,
+              labels_track_height = max(clustData$height),
+              xlab = "",
+              ylab = "",
+              main = NULL,
+              color_labels_by_k = TRUE#, # color labels by groups
+              #rect = TRUE # Add rectangle around groups
+    ) + NoLegend()
+}
+
 #Correlation data
 Corr.data <- function(Data, Datatype, samples.select, threshold = 5, method = "spearman"){
   if (Datatype == "miR"){
@@ -513,7 +563,7 @@ Corr.data <- function(Data, Datatype, samples.select, threshold = 5, method = "s
     }
   }
   
-  data.to.transform <- Data[apply(Data[,c(1,samples)], 1, max) >= threshold,] 
+  data.to.transform <- Data[apply(Data[,c(samples)], 1, max) >= threshold,] 
   StandardizedData <- scale(t(data.to.transform[,samples]), center = TRUE, scale = TRUE)
   CorrData <- cor(t(StandardizedData), method = method, use = "pairwise.complete.obs")
   
