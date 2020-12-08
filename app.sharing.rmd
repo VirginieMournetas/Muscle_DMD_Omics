@@ -4,7 +4,7 @@ output: html_document
 #runtime: shiny
 ---
 
-```{r libraries, include=FALSE, eval=TRUE}
+```{r libraries, include=FALSE, eval=FALSE}
 requiredLib <- c(
   "shiny",
   "sctransform",

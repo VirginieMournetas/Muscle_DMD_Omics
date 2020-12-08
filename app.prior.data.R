@@ -9,7 +9,6 @@ string.for.sql <- function(file){
 #### Rmarkdown ####
 
 rmdfiles <- c("app.sharing.rmd")
-#sapply(rmdfiles, knit, quiet = F)
 
 #### SQL DB ####
 
