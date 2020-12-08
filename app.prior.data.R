@@ -8,7 +8,7 @@ string.for.sql <- function(file){
 
 #### Rmarkdown ####
 
-rmdfiles <- c("app.sharing.rmd")
+rmdfiles <- c("app.sharing.md")
 
 #### SQL DB ####
 
