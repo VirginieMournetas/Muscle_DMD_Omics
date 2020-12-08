@@ -88,13 +88,14 @@ ui <- dashboardPagePlus(skin = "black" ,
                             
                             # Tab.Download ####
                             tabItem(tabName = "Download", 
+                                    h3(tags$b("How to run this app from your own computer?"), style = "color:#367FA9"),
                                     withMathJax(includeMarkdown(sapply(rmdfiles, knit, quiet = TRUE)))#,
                                     #includeHTML('app.sharing.html')
                                     ),
                             
                             # Tab.Ref ####
                             tabItem(tabName = "Ref",
-                                    p(h4(tags$b("You use data or code from this app in your research"), "- Please cite the following paper:", style = "color:#367FA9"),
+                                      p(h3(tags$b("You use data or code from this app in your research"), "- Please cite the following paper:", style = "color:#367FA9"),
                                       br(),
                                       source(file.path(dir["base"],"app.ui.Ref.01.R"), local = TRUE)$value,
                                       source(file.path(dir["base"],"app.ui.Ref.02.R"), local = TRUE)$value)), 
