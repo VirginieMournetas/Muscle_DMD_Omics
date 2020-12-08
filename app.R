@@ -88,7 +88,7 @@ ui <- dashboardPagePlus(skin = "black" ,
                             
                             # Tab.Download ####
                             tabItem(tabName = "Download", 
-                                    withMathJax(includeMarkdown(sapply(rmdfiles, knit, quiet = F)))#,
+                                    withMathJax(includeMarkdown(sapply(rmdfiles, knit, quiet = TRUE)))#,
                                     #includeHTML('app.sharing.html')
                                     ),
                             
