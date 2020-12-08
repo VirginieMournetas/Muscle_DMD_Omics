@@ -13,7 +13,7 @@ source("app.prior.folders.R", local = TRUE, encoding = "UTF-8")
 source(file.path(dir["base"], "app.prior.libraries.R"), local = TRUE, encoding = "UTF-8")
 
 #### DATA ####
-#source(file.path(dir["base"], "app.prior.data.R"), local = TRUE, encoding = "UTF-8")
+source(file.path(dir["base"], "app.prior.data.R"), local = TRUE, encoding = "UTF-8")
 
 #### FUNCTIONS ####
 source(file.path(dir["base"], "app.prior.functions.R"), local = TRUE, encoding = "UTF-8")
