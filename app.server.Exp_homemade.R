@@ -341,7 +341,7 @@ output$Exp_homemade_Graph_plot1 <- renderPlotly({
     UniquemiRData_sorted <- UniquemiRData_sorted[order(UniquemiRData_sorted$Phenotype) , ]
     UniquemiRData_sorted <- UniquemiRData_sorted[order(UniquemiRData_sorted$Cell_stage) , ]
     
-    UniquemiRmeanData <- Graph3_table.b(UniquemiRData, UniquemiRmeanData, "miR")
+    UniquemiRmeanData <- Graph3_table.b(data.query$UniquemiRData, UniquemiRmeanData, "miR")
     
     Graph_view(input$Exp_homemade_Graph, UniquemiRData_sorted, UniquemiRmeanData, id.query$ID.selected, data.query$miR_RatioStat_Data_Myogenesis, data.query$miR_RatioStat_Data_Phenotype)
     
@@ -351,7 +351,7 @@ output$Exp_homemade_Graph_plot1 <- renderPlotly({
     UniquemRNAData_sorted <- UniquemRNAData_sorted[order(UniquemRNAData_sorted$Phenotype) , ]
     UniquemRNAData_sorted <- UniquemRNAData_sorted[order(UniquemRNAData_sorted$Cell_stage) , ]
     
-    UniquemRNAmeanData <- Graph3_table.b(UniquemRNAData, UniquemRNAmeanData, "mRNA")
+    UniquemRNAmeanData <- Graph3_table.b(data.query$UniquemRNAData, UniquemRNAmeanData, "mRNA")
     
     Graph_view(input$Exp_homemade_Graph, UniquemRNAData_sorted, UniquemRNAmeanData, id.query$ID.selected, data.query$mRNA_RatioStat_Data_Myogenesis, data.query$mRNA_RatioStat_Data_Phenotype)
   }   
