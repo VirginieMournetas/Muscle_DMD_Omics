@@ -50,7 +50,8 @@ ui <- dashboardPagePlus(skin = "black" ,
                         # Body ####
                         body <- dashboardBody(
                           
-                          tags$head(tags$style(HTML(".main-sidebar { font-size: 17px; }"))) , #change the font size to 20
+                          tags$head(tags$style(HTML(".main-sidebar { font-size: 17px; }")), #change the font size to 20
+                                    includeScript("matomo.js")) , #visit metrix
 
                           tabItems(
                             
