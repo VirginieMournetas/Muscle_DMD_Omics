@@ -2,7 +2,7 @@ id.query <- reactiveValues()
 data.query <- reactiveValues()
 
 #### ID existence ####
-output$exist <- renderPrint({ 
+output$iD.exist <- renderPrint({ 
   
   if (!is.null(id.query$Id.data) && id.query$Id.data == "No data"){print("Nothing found")}
 

@@ -24,21 +24,13 @@ output$exp.homemade.graphs <- renderUI({
                           fluidRow(column(3 , boxPlus(title = "Proteomic data (Day 17)",
                                                       closable = FALSE , collapsible = TRUE , collapsed = FALSE ,
                                                       solidHeader = TRUE , width = 12 , status = "primary" , 
+                                                      verbatimTextOutput("proteomic.exist"),
                                                       plotlyOutput(outputId = "Exp_homemade_Graph_plot2"))),
                                    column(9 , boxPlus(title = "Single-cell transcriptomic data (Day 17)",
                                                       closable = FALSE , collapsible = TRUE , collapsed = FALSE ,
                                                       solidHeader = TRUE , width = 12 , status = "primary" , 
-                                                      fluidRow(column(4 , br(), actionButton("display.singlecell", label = tags$b("Display"), icon("hand-pointer"), width = '150px'), br(), 
-                                                                          br(), h5(tags$b("Reads / cell")), br(),
-                                                                          plotlyOutput(outputId = "Exp_homemade_Graph_plot3"), style = "text-align:center"),
-                                                               column(8 , selectInput("SingleCell.reduction.2", label = tags$b("Select the reduction"), 
-                                                                                       choices = list("tSNE" = "tsne" , 
-                                                                                                      "UMAP" = "umap",
-                                                                                                      "PCA" = "pca") , 
-                                                                                       selected = "tsne"),
-                                                                          fluidRow(column (6, numericInput("SingleCell.component1.2", label = tags$b("Select component x"), value = 1)),
-                                                                                   column (6, numericInput("SingleCell.component2.2", label = tags$b("Select component y"), value = 2))),
-                                                                            plotlyOutput(outputId = "Exp_homemade_Graph_plot4"))))))))
+                                                      p(br(), actionButton("display.singlecell", label = tags$b("Display"), icon("hand-pointer"), width = '150px'), br()),
+                                                      uiOutput("Single.cell.graphs"))))))
   }else if (input$Product.type == "miR"){
     fluidRow(column(12 , selectInput("Exp_homemade_Graph" , #Choose the type of wanted graph on the screen
                                       "" , 
@@ -53,6 +45,25 @@ output$exp.homemade.graphs <- renderUI({
                           plotlyOutput(outputId = "Exp_homemade_Graph_plot1"))) #Chosen plot
   }
   }
+
+})
+
+observeEvent(input$display.singlecell, {
+  
+  output$Single.cell.graphs <- renderUI({
+    
+    fluidRow(column(4 , br(), br(), h5(tags$b("Reads / cell")), br(),
+                        plotlyOutput(outputId = "Exp_homemade_Graph_plot3"), style = "text-align:center"),
+             column(8 , selectInput("SingleCell.reduction.2", label = tags$b("Select the reduction"), 
+                                    choices = list("tSNE" = "tsne" , 
+                                                   "UMAP" = "umap",
+                                                   "PCA" = "pca") , 
+                                    selected = "tsne"),
+                    fluidRow(column (6, numericInput("SingleCell.component1.2", label = tags$b("Select component x"), value = 1)),
+                             column (6, numericInput("SingleCell.component2.2", label = tags$b("Select component y"), value = 2))),
+                    plotlyOutput(outputId = "Exp_homemade_Graph_plot4")))
+    
+  })
   
 })
 
@@ -381,6 +392,7 @@ output$Exp_homemade_Graph_plot1 <- renderPlotly({
 })
 
 #### Protein plot - SINGLE GENE #### 
+
 output$Exp_homemade_Graph_plot2 <- renderPlotly({
     
     exp1.Status()
@@ -422,14 +434,23 @@ output$Exp_homemade_Graph_plot2 <- renderPlotly({
                               source = "A" , 
                               text = "") %>% layout(title = id.query$ID.selected, margin = m)
           }}else{message("No data")}
-      }
-    }
-      
-  })
+      }}
+})
+
+output$proteomic.exist <- renderPrint({ 
+  
+  if (id.query$Id.data != "No data"){
+      ProteinData.unique <- unique(ProteinData.full[, c(4, 9:17)])
+      ProteinData_Boxplot[ , 3] <- t(ProteinData.unique[ProteinData.unique$Uniprot %in% id.query$Id.data$uniprot , -1])
+  }
+  
+  if (!is.null(id.query$Id.data) && is.na(ProteinData_Boxplot[1,3])){print("No proteomic data")}
+  
+})
 
 #### Single-cell mRNA - SINGLE GENE #### 
 
-#### Observe #### 
+
 singleCell.Status <- eventReactive(input$display.singlecell, {
   
   withProgress(message = 'Generating single-cell data', detail = "part 0", value = 0, {
