@@ -40,6 +40,7 @@ fluidRow(column(12 ,
                                                      DT::dataTableOutput("Homemade_protein_table")
                                                    ),
                                                    p(icon("info-circle"), "You can select columns of interest by clicking on the 'More' button.", style = "color:#367FA9"),
+                                                   p(icon("hourglass-end"), "For the first visit, please be patient with the mRNA table, it will appear.", style = "color:#fa6e0a"),
                                                    p(icon("exclamation-triangle"), "Selecting columns of the mRNA table involve computing time and might take a little while.", style = "color:#CB4A4A")))) %>% 
           bs_append(title_side = p(icon("chart-bar") , "Graphs"), 
                     content_side = NULL , 

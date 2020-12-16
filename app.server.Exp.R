@@ -182,7 +182,7 @@ output$db_links <- renderUI({
 output$publi.table <- DT::renderDataTable({
   
   exp1.Status()
-  colnames(data.list)
+
   if (id.query$Id.data != "No data"){  
     url.api <- paste0("https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=", id.query$Id.data$symbol, "%20sort_date:y&format=json")
     data.api <- GET(url.api)

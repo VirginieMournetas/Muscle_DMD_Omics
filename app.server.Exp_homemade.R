@@ -28,7 +28,8 @@ output$exp.homemade.graphs <- renderUI({
                                    column(9 , boxPlus(title = "Single-cell transcriptomic data (Day 17)",
                                                       closable = FALSE , collapsible = TRUE , collapsed = FALSE ,
                                                       solidHeader = TRUE , width = 12 , status = "primary" , 
-                                                      fluidRow(column(4 , br(), br(), br(), h5(tags$b("Reads / cell")), br(),
+                                                      fluidRow(column(4 , br(), actionButton("display.singlecell", label = tags$b("Display"), icon("hand-pointer"), width = '150px'), br(), 
+                                                                          br(), h5(tags$b("Reads / cell")), br(),
                                                                           plotlyOutput(outputId = "Exp_homemade_Graph_plot3"), style = "text-align:center"),
                                                                column(8 , selectInput("SingleCell.reduction.2", label = tags$b("Select the reduction"), 
                                                                                        choices = list("tSNE" = "tsne" , 
@@ -367,25 +368,12 @@ output$Exp_homemade_Graph_plot1 <- renderPlotly({
       Graph_view(input$Exp_homemade_Graph, UniquemiRData_sorted, UniquemiRmeanData, id.query$ID.selected, data.query$miR_RatioStat_Data_Myogenesis, data.query$miR_RatioStat_Data_Phenotype)
       
     }else if(input$Product.type == "mRNA / Protein"){
+
+      UniquemRNAData_sorted <- data.query$UniquemRNAData[order(data.query$UniquemRNAData$Cell_line), ]
+      UniquemRNAData_sorted <- UniquemRNAData_sorted[order(UniquemRNAData_sorted$Phenotype) , ]
+      UniquemRNAData_sorted <- UniquemRNAData_sorted[order(UniquemRNAData_sorted$Cell_stage) , ]
       
-      withProgress(message = 'Generating bulk data', detail = "part 0", value = 0, {
-        for (i in 1:3) {
-          # Each time through the loop, add another row of data. This a stand-in
-          # for a long-running computation.
-          
-          UniquemRNAData_sorted <- data.query$UniquemRNAData[order(data.query$UniquemRNAData$Cell_line), ]
-          UniquemRNAData_sorted <- UniquemRNAData_sorted[order(UniquemRNAData_sorted$Phenotype) , ]
-          UniquemRNAData_sorted <- UniquemRNAData_sorted[order(UniquemRNAData_sorted$Cell_stage) , ]
-          
-          UniquemRNAmeanData <- Graph3_table.b(data.query$UniquemRNAData, UniquemRNAmeanData, "mRNA")
-          
-          # Increment the progress bar, and update the detail text.
-          incProgress(0.333, detail = paste("part", i))
-          
-          # Pause for 0.1 seconds to simulate a long computation.
-          #Sys.sleep(0.1)
-        }
-      })
+      UniquemRNAmeanData <- Graph3_table.b(data.query$UniquemRNAData, UniquemRNAmeanData, "mRNA")
       
       Graph_view(input$Exp_homemade_Graph, UniquemRNAData_sorted, UniquemRNAmeanData, id.query$ID.selected, data.query$mRNA_RatioStat_Data_Myogenesis, data.query$mRNA_RatioStat_Data_Phenotype)
     }   
@@ -440,47 +428,59 @@ output$Exp_homemade_Graph_plot2 <- renderPlotly({
   })
 
 #### Single-cell mRNA - SINGLE GENE #### 
-output$Exp_homemade_Graph_plot3 <- renderPlotly({
+
+#### Observe #### 
+singleCell.Status <- eventReactive(input$display.singlecell, {
   
   withProgress(message = 'Generating single-cell data', detail = "part 0", value = 0, {
     for (i in 1:3) {
       # Each time through the loop, add another row of data. This a stand-in
       # for a long-running computation.
-      
-      table <- SC_datacount(singlecell.matrix, id.query$Id.data$symbol)
-      fig <- plot_ly(
-        x = rownames(table),
-        y = table[,1],
-        type = "bar", 
-        marker = list(color = 'rgb(158,217,59)')
-      ) %>% layout(title = id.query$ID.selected, xaxis = list(title = "Number of reads"), yaxis = list(title = "Number of cells"), margin = m)
-      
-      # Increment the progress bar, and update the detail text.
-      incProgress(0.333, detail = paste("part", i))
-      
-      # Pause for 0.1 seconds to simulate a long computation.
-      #Sys.sleep(0.1)
-    }
-  })
   
-  fig
-})
-
-output$Exp_homemade_Graph_plot4 <- renderPlotly({
-  
-  FeaturePlot(
+    data.query$sc.reads.table <- SC_datacount(singlecell.matrix, id.query$Id.data$symbol)
+    
+    FeaturePlot(
       singlecell,
       id.query$Id.data$symbol,
       reduction = input$SingleCell.reduction.2,
       dims = c(input$SingleCell.component1.2, input$SingleCell.component2.2),
       cells = NULL,
       c("lightgrey", '#9ED93B', '#3F5617', '#000000'))
-    ggplotly(p = ggplot2::last_plot() , 
-             width = NULL , 
-             height = NULL , 
-             tooltip = "all" , 
-             dynamicTicks = FALSE , 
-             layerData = 1 , 
-             originalData = TRUE , 
-             source = "A") %>% layout(margin = m)
+    
+    data.query$sc.reads.plot <- ggplotly(p = ggplot2::last_plot() , 
+                                         width = NULL , 
+                                         height = NULL , 
+                                         tooltip = "all" , 
+                                         dynamicTicks = FALSE , 
+                                         layerData = 1 , 
+                                         originalData = TRUE , 
+                                         source = "A") %>% layout(margin = m)
+  
+  
+  
+    # Increment the progress bar, and update the detail text.
+    incProgress(0.333, detail = paste("part", i))
+    
+    # Pause for 0.1 seconds to simulate a long computation.
+    #Sys.sleep(0.1)
+    }})
+
+}) 
+  
+output$Exp_homemade_Graph_plot3 <- renderPlotly({
+  
+  singleCell.Status()
+  
+  plot_ly(
+    x = rownames(data.query$sc.reads.table),
+    y = data.query$sc.reads.table[,1],
+    type = "bar", 
+    marker = list(color = 'rgb(158,217,59)')
+  ) %>% layout(title = id.query$ID.selected, xaxis = list(title = "Number of reads"), yaxis = list(title = "Number of cells"), margin = m)
 })
+
+output$Exp_homemade_Graph_plot4 <- renderPlotly({
+  singleCell.Status()
+  data.query$sc.reads.plot
+})
+
