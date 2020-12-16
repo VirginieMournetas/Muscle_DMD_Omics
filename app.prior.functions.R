@@ -32,45 +32,6 @@ Render_Table <- function(DATA){
 
 
 #### EXP - Gene ID CARD #### 
-Infos <- function (Product.type, ID.selected, ID.type, con){
-  
-  if (Product.type == "miR"){
-    IDs.db <- "human_full_miR_ids_db"
-  }else if(Product.type == "mRNA / Protein"){
-    IDs.db <- "human_genes_ids_db_simplified"
-  }
-  
-  if(ID.type == "EntrezGene ID"){
-    ID.type <- "entrezgeneid"
-  }else if(ID.type == "Ensembl ID"){
-    ID.type <- "ensembl"
-  }else if(ID.type == "Official Symbol"){
-    ID.type <- "symbol"
-  }else if(ID.type == "Official Name"){
-    ID.type <- "name"
-  }else if(ID.type == "Uniprot ID"){
-    ID.type <- "uniprot"
-  }else if(ID.type == "mirBase ID"){
-    ID.type <- "human_mirbase_id"
-  }else if(ID.type == "mirBase Name"){
-    ID.type <- "human_mirbase_name"
-  }
-  
-  query <- paste("SELECT * FROM", IDs.db, "WHERE", ID.type, "=", paste0("'", ID.selected,"'"))
-  connect <- dbConnect(RMySQL::MySQL(), user = con[4] , password = con[5] , host=con[2] , port = as.integer(con[3]) , dbname = con[1])
-  res1 <- dbGetQuery(connect, query)
-  dbDisconnect(connect) 
-  
-  res2 <- NULL
-  for (i in c(1:length(names(res1)))){
-    res2 <- c(res2, list(unique(res1[,i])))
-  }
-  names(res2) <- names(res1)
-  res2
-  
-  return(res2)
-}
-
 Infos2 <- function (Product.type, ID.selected, ID.type){
   
   if (Product.type == "miR"){
@@ -96,21 +57,23 @@ Infos2 <- function (Product.type, ID.selected, ID.type){
   }
   
   query <- unique(IDs.db[IDs.db[[ID.type]] == ID.selected,])
-  query <- query[rowSums(is.na(query)) != ncol(query), ]
   
-  for (i in c(1:length(names(query)))){
-    query[,i] <- as.character(query[,i])
+  if (all(is.na(query))){query.data <- "No data"}else{
+    query <- query[rowSums(is.na(query)) != ncol(query), ]
+    
+    for (i in c(1:length(names(query)))){
+      query[,i] <- as.character(query[,i])
+    }
+    query$entrezgeneid <- as.integer(query$entrezgeneid)
+    
+    query.data <- NULL
+    for (i in c(1:length(names(query)))){
+      query.data <- c(query.data , list(unique(query[,i])))
+    }
+    names(query.data) <- names(query)
+    
   }
-  query$entrezgeneid <- as.integer(query$entrezgeneid)
-
-  query.data <- NULL
-  for (i in c(1:length(names(query)))){
-    query.data <- c(query.data , list(unique(query[,i])))
-  }
-  names(query.data) <- names(query)
-  
   return(query.data)
-  
 }
 
 db_Links <- function (Product.type, Infos){ #need to deal with multiple 

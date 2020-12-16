@@ -2,8 +2,11 @@
 
 #### plots window
 output$exp.homemade.graphs <- renderUI({
+  
   exp1.Status()
-  if(input$Product.type == "mRNA / Protein"){
+  
+  if (id.query$Id.data != "No data"){
+    if(input$Product.type == "mRNA / Protein"){
     fluidRow(column(12 , fluidRow(column(12 ,  boxPlus(title = "Bulk transcriptomic data (All data points)",
                                                        closable = FALSE , collapsible = TRUE , collapsed = FALSE ,
                                                        solidHeader = TRUE , width = 12 , status = "primary" , 
@@ -48,12 +51,18 @@ output$exp.homemade.graphs <- renderUI({
                                       selected = 1) , 
                           plotlyOutput(outputId = "Exp_homemade_Graph_plot1"))) #Chosen plot
   }
+  }
+  
 })
 
 #### tables window
 output$exp.homemade.tables <- renderUI({
+  
   exp1.Status()
-  if(input$Product.type == "mRNA / Protein"){
+  
+  if (id.query$Id.data != "No data"){
+  
+    if(input$Product.type == "mRNA / Protein"){
     fluidRow(column(8 ,boxPlus(title = "Bulk transcriptomic data (All data points)",
                                closable = FALSE , collapsible = TRUE , collapsed = FALSE ,
                                solidHeader = TRUE , width = 12 , status = "primary" , 
@@ -77,6 +86,8 @@ output$exp.homemade.tables <- renderUI({
                                       width = 200 ),
                           DT::dataTableOutput("Exp_homemade_table_unique")))
   }
+  }
+  
 })
 
 
@@ -88,20 +99,22 @@ output$exp.homemade.tables <- renderUI({
 #mRNA datatable
 output$Homemade_mRNA_table <- DT::renderDataTable({
   
-  withProgress(message = 'Generating table data', detail = "part 0", value = 0, {
-    for (i in 1:2) {
-      # Each time through the loop, add another row of data. This a stand-in
-      # for a long-running computation.
-      
-      table <- mRNAseqData.full %>% select(one_of(input$mRNAseqData.selected.columns))
-      Ready.table <- Render_Table(unique(table))
-     
-      # Increment the progress bar, and update the detail text.
-      incProgress(0.5, detail = paste("part", i))
-      
-      # Pause for 0.1 seconds to simulate a long computation.
-      #Sys.sleep(0.1)
-    }})
+  if (all(input$mRNAseqData.selected.columns  == colnames(mRNAseqData.full))){
+    Ready.table <- Render_Table(mRNAseqData.full)}else{
+    withProgress(message = 'Generating table data', detail = "part 0", value = 0, {
+      for (i in 1:2) {
+        # Each time through the loop, add another row of data. This a stand-in
+        # for a long-running computation.
+        
+          table <- mRNAseqData.full %>% select(one_of(input$mRNAseqData.selected.columns))
+          Ready.table <- Render_Table(unique(table))
+       
+          # Increment the progress bar, and update the detail text.
+          incProgress(0.5, detail = paste("part", i))
+          
+          # Pause for 0.1 seconds to simulate a long computation.
+          #Sys.sleep(0.1)
+      }})}
   
   Ready.table
   #Render_Table(SQL_Table("mRNAseqData"))
@@ -128,6 +141,8 @@ output$Exp_homemade_table_unique <- DT::renderDataTable({
   
   exp1.Status()
   
+  if (id.query$Id.data != "No data"){
+  
   if(input$Product.type == "miR"){
     
     if (input$Unique_table_type == 1){
@@ -150,6 +165,8 @@ output$Exp_homemade_table_unique <- DT::renderDataTable({
       Render_Table(data.query$mRNA_RatioStat_Data_Phenotype)
     }
   }
+  
+  }
 })
 
 # Protein Data TABLE 
@@ -157,10 +174,13 @@ output$Exp_homemade_table_uniqueProt <- DT::renderDataTable({
   
   exp1.Status()
   
-  colnames(ProteinData_Table) <- c("" , id.query$ID.selected)   
-  ProteinData.unique <- unique(ProteinData.full[ , c(4,6:22)])
-  ProteinData_Table[ , 2] <- t(ProteinData.unique[ProteinData.unique$Uniprot %in% id.query$Id.data$uniprot , ]) #id.query$Id.data$ensembl
-  Render_Table(ProteinData_Table)
+  if (id.query$Id.data != "No data"){
+    colnames(ProteinData_Table) <- c("" , id.query$ID.selected)   
+    ProteinData.unique <- unique(ProteinData.full[ , c(4,6:22)])
+    ProteinData_Table[ , 2] <- t(ProteinData.unique[ProteinData.unique$Uniprot %in% id.query$Id.data$uniprot , ]) #id.query$Id.data$ensembl
+    Render_Table(ProteinData_Table)
+  }
+  
 })
 
 
@@ -335,77 +355,94 @@ output$Exp_homemade_Graph_plot1 <- renderPlotly({
   
   exp1.Status()
   
-  if(input$Product.type == "miR"){
-    
-    UniquemiRData_sorted <- data.query$UniquemiRData[order(data.query$UniquemiRData$Cell_line) , ]
-    UniquemiRData_sorted <- UniquemiRData_sorted[order(UniquemiRData_sorted$Phenotype) , ]
-    UniquemiRData_sorted <- UniquemiRData_sorted[order(UniquemiRData_sorted$Cell_stage) , ]
-    
-    UniquemiRmeanData <- Graph3_table.b(data.query$UniquemiRData, UniquemiRmeanData, "miR")
-    
-    Graph_view(input$Exp_homemade_Graph, UniquemiRData_sorted, UniquemiRmeanData, id.query$ID.selected, data.query$miR_RatioStat_Data_Myogenesis, data.query$miR_RatioStat_Data_Phenotype)
-    
-  }else if(input$Product.type == "mRNA / Protein"){
-    
-    UniquemRNAData_sorted <- data.query$UniquemRNAData[order(data.query$UniquemRNAData$Cell_line), ]
-    UniquemRNAData_sorted <- UniquemRNAData_sorted[order(UniquemRNAData_sorted$Phenotype) , ]
-    UniquemRNAData_sorted <- UniquemRNAData_sorted[order(UniquemRNAData_sorted$Cell_stage) , ]
-    
-    UniquemRNAmeanData <- Graph3_table.b(data.query$UniquemRNAData, UniquemRNAmeanData, "mRNA")
-    
-    Graph_view(input$Exp_homemade_Graph, UniquemRNAData_sorted, UniquemRNAmeanData, id.query$ID.selected, data.query$mRNA_RatioStat_Data_Myogenesis, data.query$mRNA_RatioStat_Data_Phenotype)
-  }   
+  if (id.query$Id.data != "No data"){
+    if(input$Product.type == "miR"){
+      
+      UniquemiRData_sorted <- data.query$UniquemiRData[order(data.query$UniquemiRData$Cell_line) , ]
+      UniquemiRData_sorted <- UniquemiRData_sorted[order(UniquemiRData_sorted$Phenotype) , ]
+      UniquemiRData_sorted <- UniquemiRData_sorted[order(UniquemiRData_sorted$Cell_stage) , ]
+      
+      UniquemiRmeanData <- Graph3_table.b(data.query$UniquemiRData, UniquemiRmeanData, "miR")
+      
+      Graph_view(input$Exp_homemade_Graph, UniquemiRData_sorted, UniquemiRmeanData, id.query$ID.selected, data.query$miR_RatioStat_Data_Myogenesis, data.query$miR_RatioStat_Data_Phenotype)
+      
+    }else if(input$Product.type == "mRNA / Protein"){
+      
+      withProgress(message = 'Generating bulk data', detail = "part 0", value = 0, {
+        for (i in 1:3) {
+          # Each time through the loop, add another row of data. This a stand-in
+          # for a long-running computation.
+          
+          UniquemRNAData_sorted <- data.query$UniquemRNAData[order(data.query$UniquemRNAData$Cell_line), ]
+          UniquemRNAData_sorted <- UniquemRNAData_sorted[order(UniquemRNAData_sorted$Phenotype) , ]
+          UniquemRNAData_sorted <- UniquemRNAData_sorted[order(UniquemRNAData_sorted$Cell_stage) , ]
+          
+          UniquemRNAmeanData <- Graph3_table.b(data.query$UniquemRNAData, UniquemRNAmeanData, "mRNA")
+          
+          # Increment the progress bar, and update the detail text.
+          incProgress(0.333, detail = paste("part", i))
+          
+          # Pause for 0.1 seconds to simulate a long computation.
+          #Sys.sleep(0.1)
+        }
+      })
+      
+      Graph_view(input$Exp_homemade_Graph, UniquemRNAData_sorted, UniquemRNAmeanData, id.query$ID.selected, data.query$mRNA_RatioStat_Data_Myogenesis, data.query$mRNA_RatioStat_Data_Phenotype)
+    }   
+  }
 })
 
 #### Protein plot - SINGLE GENE #### 
 output$Exp_homemade_Graph_plot2 <- renderPlotly({
     
     exp1.Status()
-    
-    {
-      ProteinData.unique <- unique(ProteinData.full[, c(4, 9:17)])
-      ProteinData_Boxplot[ , 3] <- t(ProteinData.unique[ProteinData.unique$Uniprot %in% id.query$Id.data$uniprot , -1])
-      if (!is.na(ProteinData_Boxplot[1,3])){
-        {
-          ggplot(ProteinData_Boxplot
-                 , aes(x = Data , y = Protein , text = paste(Ratio , ": " , Protein)))+            
-            geom_hline(yintercept = 1 , linetype = "dashed")+
-            geom_boxplot(width = 0.7 , color = "BLACK" , alpha = 0.5 , fill = 'grey') +
-            geom_point(color = "black" , size = 3)+ 
-            geom_hline(yintercept = 1)+
-            geom_hline(yintercept = 2 , linetype = "dashed")+
-            geom_hline(yintercept = 1.32 , linetype = "dashed" , color = "grey")+
-            geom_hline(yintercept = 0.76 , linetype = "dashed" , color = "grey")+
-            geom_hline(yintercept = 0.5 , linetype = "dashed")+
-            scale_y_continuous(trans = log2_trans() , breaks = c(0.5 , 0.76 , 1 , 1.32 , 2))+  
-            xlab("") +
-            ylab("DMD/Healthy ratios") +
-            theme_bw() +
-            scale_x_discrete(labels = function(x) str_wrap(x , width = 9))+
-            theme(
-              axis.title.y = element_text(color = "black" , face = "bold" , size = 9) , 
-              axis.text.y = element_text(color = "black" , face = "bold" , size = 9) , 
-              plot.title = element_text(lineheight = 8 , face = "bold" , size = 9)
-            )#+
-          #ggtitle(paste(id.query$ID.selected))
-          Graph <- ggplotly(p = ggplot2::last_plot() , 
-                            width = NULL , 
-                            height = NULL , 
-                            tooltip = "text" , 
-                            dynamicTicks = FALSE , 
-                            layerData = 1 , 
-                            originalData = TRUE , 
-                            source = "A" , 
-                            text = "") %>% layout(title = id.query$ID.selected, margin = m)
-        }}else{message("No data")}
+  
+    if (id.query$Id.data != "No data"){
+      {
+        ProteinData.unique <- unique(ProteinData.full[, c(4, 9:17)])
+        ProteinData_Boxplot[ , 3] <- t(ProteinData.unique[ProteinData.unique$Uniprot %in% id.query$Id.data$uniprot , -1])
+        if (!is.na(ProteinData_Boxplot[1,3])){
+          {
+            ggplot(ProteinData_Boxplot
+                   , aes(x = Data , y = Protein , text = paste(Ratio , ": " , Protein)))+            
+              geom_hline(yintercept = 1 , linetype = "dashed")+
+              geom_boxplot(width = 0.7 , color = "BLACK" , alpha = 0.5 , fill = 'grey') +
+              geom_point(color = "black" , size = 3)+ 
+              geom_hline(yintercept = 1)+
+              geom_hline(yintercept = 2 , linetype = "dashed")+
+              geom_hline(yintercept = 1.32 , linetype = "dashed" , color = "grey")+
+              geom_hline(yintercept = 0.76 , linetype = "dashed" , color = "grey")+
+              geom_hline(yintercept = 0.5 , linetype = "dashed")+
+              scale_y_continuous(trans = log2_trans() , breaks = c(0.5 , 0.76 , 1 , 1.32 , 2))+  
+              xlab("") +
+              ylab("DMD/Healthy ratios") +
+              theme_bw() +
+              scale_x_discrete(labels = function(x) str_wrap(x , width = 9))+
+              theme(
+                axis.title.y = element_text(color = "black" , face = "bold" , size = 9) , 
+                axis.text.y = element_text(color = "black" , face = "bold" , size = 9) , 
+                plot.title = element_text(lineheight = 8 , face = "bold" , size = 9)
+              )#+
+            #ggtitle(paste(id.query$ID.selected))
+            Graph <- ggplotly(p = ggplot2::last_plot() , 
+                              width = NULL , 
+                              height = NULL , 
+                              tooltip = "text" , 
+                              dynamicTicks = FALSE , 
+                              layerData = 1 , 
+                              originalData = TRUE , 
+                              source = "A" , 
+                              text = "") %>% layout(title = id.query$ID.selected, margin = m)
+          }}else{message("No data")}
+      }
     }
-    
+      
   })
 
 #### Single-cell mRNA - SINGLE GENE #### 
 output$Exp_homemade_Graph_plot3 <- renderPlotly({
   
-  withProgress(message = 'Generating data', detail = "part 0", value = 0, {
+  withProgress(message = 'Generating single-cell data', detail = "part 0", value = 0, {
     for (i in 1:3) {
       # Each time through the loop, add another row of data. This a stand-in
       # for a long-running computation.

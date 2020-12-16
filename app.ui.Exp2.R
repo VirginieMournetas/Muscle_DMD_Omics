@@ -38,10 +38,15 @@ fluidRow(column(12 ,
                                                                                                   colnames(ProteinData.full),
                                                                                                   selected = colnames(ProteinData.full))),
                                                      DT::dataTableOutput("Homemade_protein_table")
-                                                   )))) %>% 
+                                                   ),
+                                                   p(icon("info-circle"), "You can select columns of interest by clicking on the 'More' button.", style = "color:#367FA9"),
+                                                   p(icon("exclamation-triangle"), "Selecting columns of the mRNA table involve computing time and might take a little while.", style = "color:#CB4A4A")))) %>% 
           bs_append(title_side = p(icon("chart-bar") , "Graphs"), 
                     content_side = NULL , 
                     content_main = div(
+                      p(icon("info-circle"), "Data are normalised, centered and reduced.", style = "color:#367FA9"),
+                      p(icon("hourglass-end"), "For the first visit, please be patient, graphs will appear.", style = "color:#fa6e0a"),
+                      p(icon("exclamation-triangle"), "(*) Changing these parameters will involve computing time and might take a while.", style = "color:#CB4A4A"),
                       boxPlus(
                         closable = FALSE , collapsible = TRUE , collapsed = FALSE ,
                         title = tags$b("Dimension reductions") ,status = "primary" , solidHeader = TRUE , width = 12 ,  
@@ -160,9 +165,6 @@ fluidRow(column(12 ,
                                           plotlyOutput(outputId = "Exp_homemade_corr.miR")
                                         )))),
 
-                    br(),
-                    p(icon("info-circle"), "Data are normalised, centered and reduced.", style = "color:#367FA9"),
-                    p(icon("exclamation-triangle"), "(*) Changing these parameters will involve computing time and might take a while.", style = "color:#CB4A4A"),
                     br())),
         use_bs_accordion_sidebar()
         ))

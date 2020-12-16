@@ -1,6 +1,13 @@
 id.query <- reactiveValues()
 data.query <- reactiveValues()
 
+#### ID existence ####
+output$exist <- renderPrint({ 
+  
+  if (!is.null(id.query$Id.data) && id.query$Id.data == "No data"){print("Nothing found")}
+
+  })
+
 #### ID list #### 
 output$Product.select <- renderUI({
   if (input$Product.type == "miR"){
@@ -32,7 +39,7 @@ output$ID.select <- renderUI({
   if (input$Product.type == "miR"){
     val <- "MIR206"
   }else if(input$Product.type == "mRNA / Protein"){
-    val <- ""
+    val <- "DMD"
   }
   
   textInput("ID.selected", label = NULL , value = val, width = '150px')
@@ -48,7 +55,8 @@ exp1.Status <- eventReactive(input$display, { #reactive({
   
   id.query$Id.data <- Infos2(input$Product.type, id.query$ID.selected, input$ID.type)
   
-  if(input$Product.type == "miR"){
+  if (id.query$Id.data != "No data"){
+    if(input$Product.type == "miR"){
     data.query$UniquemiRData <- Graph1_2_table.b(miRseqData.short, UniquemiRData, "miR", id.query$Id.data, input$ID.type)
     data.query$miR_RatioStat_Data_Myogenesis <- Graph4_to_7_table(miR_RatioStat_Data_Myogenesis, miR_Ratios_Stats.short, "miR", id.query$Id.data, "MYOGENESIS")
     data.query$miR_RatioStat_Data_Phenotype <- Graph4_to_7_table(miR_RatioStat_Data_Phenotype, miR_Ratios_Stats.short, "miR", id.query$Id.data, "PHENOTYPE")
@@ -56,14 +64,18 @@ exp1.Status <- eventReactive(input$display, { #reactive({
     data.query$UniquemRNAData <- Graph1_2_table.b(mRNAseqData.short, UniquemRNAData, "mRNA", id.query$Id.data, input$ID.type)
     data.query$mRNA_RatioStat_Data_Myogenesis <- Graph4_to_7_table(mRNA_RatioStat_Data_Myogenesis, mRNA_Ratios_Stats.short, "mRNA", id.query$Id.data, "MYOGENESIS")
     data.query$mRNA_RatioStat_Data_Phenotype <- Graph4_to_7_table(mRNA_RatioStat_Data_Phenotype, mRNA_Ratios_Stats.short, "mRNA", id.query$Id.data, "PHENOTYPE")
-  }
+  }}
+  
+  
 })
 
 #### mRNA db links #### 
 output$RNA_info <- renderUI({
   
   exp1.Status()
-  if (input$Product.type == "miR"){
+  
+  if (id.query$Id.data != "No data"){ 
+    if (input$Product.type == "miR"){
     p(style = "text-align:left", 
       tags$b("Full name: "), br(),  paste(id.query$Id.data$name, collapse = ", "), br() , br() ,
       tags$b("Official Symbol: "), br(), paste(id.query$Id.data$symbol, collapse = ", "), br() , br() ,
@@ -83,13 +95,16 @@ output$RNA_info <- renderUI({
       tags$b("Chromosome: "), br(), id.query$Id.data$chr , br() , br() ,
       tags$b("Strand: "), br(), id.query$Id.data$strand)
   }
+  }
   
 })
 
 output$db_links <- renderUI({
   
   exp1.Status()
-  if (input$Product.type == "miR"){
+  
+  if (id.query$Id.data != "No data"){  
+    if (input$Product.type == "miR"){
     fluidRow(
       column(2, p(" " , style = "text-align:center", uiOutput("RNA_info"))),
       column(2, p(tags$b("Gene/mRNA databases") , style = "text-align:center", 
@@ -159,22 +174,28 @@ output$db_links <- renderUI({
                     tags$a(tags$img(src = db_BioProject , style="height:90%; width:90%"), href = db_Links(input$Product.type, id.query$Id.data)[19,3] , target = "_blank"))))
     )
   }
+  }
+  
 })
 
 #### Publi table ####
 output$publi.table <- DT::renderDataTable({
+  
   exp1.Status()
-  url.api <- paste0("https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=", id.query$Id.data$symbol, "%20sort_date:y&format=json")
-  data.api <- GET(url.api)
-  if (data.api$status == 200) {
-    data.use <- fromJSON(rawToChar(data.api$content))
-    data.list <- as.data.frame(data.use$resultList)
-    data.list$result.pmid <- replace(data.list$result.pmid, 
-                                     c(1:length(data.list$result.pmid)), 
-                                     paste0("<a href='", "https://europepmc.org/article/MED/", 
-                                            data.list$result.pmid, "?singleResult=true", "' target='_blank'>", data.list$result.pmid,"</a>")) #to add links instead of only the accession nb
-  }else{
-    message("There is an issue with your request.")
+  colnames(data.list)
+  if (id.query$Id.data != "No data"){  
+    url.api <- paste0("https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=", id.query$Id.data$symbol, "%20sort_date:y&format=json")
+    data.api <- GET(url.api)
+    if (data.api$status == 200) {
+      data.use <- fromJSON(rawToChar(data.api$content))
+      data.list <- as.data.frame(data.use$resultList)
+      data.list$result.pmid <- replace(data.list$result.pmid, 
+                                       c(1:length(data.list$result.pmid)), 
+                                       paste0("<a href='", "https://europepmc.org/article/MED/", 
+                                              data.list$result.pmid, "?singleResult=true", "' target='_blank'>", data.list$result.pmid,"</a>")) #to add links instead of only the accession nb
+    }else{
+      print("There is an issue with your request.")
+    }
+    Render_Table(as.data.frame(data.list[, c(1:7, 10)]))
   }
-  Render_Table(as.data.frame(data.list[, c(1:4, 6:9, 11, 14)]))
 })
