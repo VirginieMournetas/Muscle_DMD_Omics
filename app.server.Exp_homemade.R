@@ -371,7 +371,7 @@ output$Exp_homemade_Graph_plot1 <- renderPlotly({
     if(input$Product.type == "miR"){
       
       UniquemiRData_sorted <- data.query$UniquemiRData[order(data.query$UniquemiRData$Cell_line) , ]
-      UniquemiRData_sorted <- UniquemiRData_sorted[order(UniquemiRData_sorted$Phenotype) , ]
+      UniquemiRData_sorted <- UniquemiRData_sorted[order(UniquemiRData_sorted$Phenotype, decreasing = TRUE) , ]
       UniquemiRData_sorted <- UniquemiRData_sorted[order(UniquemiRData_sorted$Cell_stage) , ]
       
       UniquemiRmeanData <- Graph3_table.b(data.query$UniquemiRData, UniquemiRmeanData, "miR")
@@ -381,7 +381,7 @@ output$Exp_homemade_Graph_plot1 <- renderPlotly({
     }else if(input$Product.type == "mRNA / Protein"){
 
       UniquemRNAData_sorted <- data.query$UniquemRNAData[order(data.query$UniquemRNAData$Cell_line), ]
-      UniquemRNAData_sorted <- UniquemRNAData_sorted[order(UniquemRNAData_sorted$Phenotype) , ]
+      UniquemRNAData_sorted <- UniquemRNAData_sorted[order(UniquemRNAData_sorted$Phenotype, decreasing = TRUE) , ]
       UniquemRNAData_sorted <- UniquemRNAData_sorted[order(UniquemRNAData_sorted$Cell_stage) , ]
       
       UniquemRNAmeanData <- Graph3_table.b(data.query$UniquemRNAData, UniquemRNAmeanData, "mRNA")

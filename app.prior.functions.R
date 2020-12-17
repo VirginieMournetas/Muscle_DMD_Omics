@@ -200,7 +200,7 @@ Graph_view <- function(input_RNA_Graph, UniqueRNAData_sorted, UniqueRNAmeanData,
     fig <- plot_ly() 
     fig <- fig %>%
       add_trace( 
-        y = UniqueRNAData_sorted[ , 6] , 
+        y = as.numeric(UniqueRNAData_sorted[ , 6]) , 
         x = UniqueRNAData_sorted[ , 7] , 
         color = UniqueRNAData_sorted[ , 2] , 
         colors = c('#340042' , '#340042' , '#340042','#9ED93B' , '#9ED93B' , '#9ED93B') , 
@@ -214,7 +214,7 @@ Graph_view <- function(input_RNA_Graph, UniqueRNAData_sorted, UniqueRNAmeanData,
     fig <- fig %>%
       add_trace(
         type = 'box' , 
-        y = UniqueRNAData_sorted[ , 6] , 
+        y = as.numeric(UniqueRNAData_sorted[ , 6]) , 
         x = UniqueRNAData_sorted[ , 8] , 
         color = UniqueRNAData_sorted[ , 2] , 
         colors = c('#340042', '#9ED93B') , 

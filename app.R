@@ -1,8 +1,7 @@
 #setwd("/home/virginie/shared/Muscle_DMD_Omics")
-#setwd("/src/shiny-server/Muscle_DMD_Omics")
 setwd("./")
 
-Last_Update <- "16/12/20"
+Last_Update <- "17/12/20"
 
 
 #### FOLDERS #### 
