@@ -184,7 +184,7 @@ output$publi.table <- DT::renderDataTable({
   exp1.Status()
 
   if (id.query$Id.data != "No data"){  
-    url.api <- paste0("https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=", id.query$Id.data$symbol, "%20sort_date:y&format=json")
+    url.api <- "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=DMD%20sort_date:y&format=json"#paste0("https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=", id.query$Id.data$symbol, "%20sort_date:y&format=json")
     data.api <- GET(url.api)
     if (data.api$status == 200) {
       data.use <- fromJSON(rawToChar(data.api$content))
@@ -196,6 +196,15 @@ output$publi.table <- DT::renderDataTable({
     }else{
       print("There is an issue with your request.")
     }
-    Render_Table(as.data.frame(data.list[, c(1:7, 10)]))
+    publi <- as.data.frame(cbind(data.list$result.id,
+                                 data.list$result.source,
+                                 data.list$result.pmid,
+                                 data.list$result.doi,
+                                 data.list$result.title,
+                                 data.list$result.authorString,
+                                 data.list$result.journalTitle,
+                                 data.list$result.pubYear))
+    colnames(publi) <- c("ID","Source","PMID","DOI","Title","Authors","Journal","Year")
+    Render_Table(publi) #data.list[, c(1:7, 10)]
   }
 })
