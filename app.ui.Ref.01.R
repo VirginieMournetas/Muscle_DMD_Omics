@@ -3,7 +3,7 @@ boxPlus(
   closable = FALSE, 
   solidHeader = TRUE, 
   collapsible = TRUE,
-  collapsed = FALSE,
+  collapsed = TRUE,
   width = 12 ,
   enable_label = TRUE,
   label_text = 1,

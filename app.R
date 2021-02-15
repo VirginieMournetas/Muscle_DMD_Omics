@@ -1,7 +1,7 @@
 #setwd("/home/virginie/shared/Muscle_DMD_Omics")
 setwd("./")
 
-Last_Update <- "17/12/20"
+Last_Update <- "15/02/21"
 
 
 #### FOLDERS #### 
@@ -94,7 +94,11 @@ ui <- dashboardPagePlus(skin = "black" ,
                             
                             # Tab.Ref ####
                             tabItem(tabName = "Ref",
-                                      p(h3(tags$b("You use data or code from this app in your research"), "- Please cite the following paper:", style = "color:#367FA9"),
+                                      p(h4(tags$b("You use data or code from this app in your research (licensed under GNU General Public License v3.0)"), "- Please cite the following paper:", style = "color:#367FA9"),
+                                      br(),
+                                      h5(tags$a("Myogenesis modelled by human pluripotent stem cells: a multi‐omic study of Duchenne myopathy early onset, Mournetas et al., JCSM, 2021", href = "https://onlinelibrary.wiley.com/doi/10.1002/jcsm.12665")),
+                                      br(),
+                                      h4(tags$b("Related publications:",style = "color:#367FA9")),
                                       br(),
                                       source(file.path(dir["base"],"app.ui.Ref.01.R"), local = TRUE)$value,
                                       source(file.path(dir["base"],"app.ui.Ref.02.R"), local = TRUE)$value)), 
@@ -112,7 +116,7 @@ ui <- dashboardPagePlus(skin = "black" ,
                           #Bottom logo####
                           div(
                             p(tags$img(src = logo_bottom , style="height:70%; width:70%"), style = "text-align:center"),
-                            p("Last update: ",tags$b(Last_Update), tags$i(" by Virginie Mournetas") , style = "text-align:center")
+                            p("Last update: ",tags$b(Last_Update), tags$i(" by Virginie Mournetas") , style = "text-align:center", br(), "Licensed under GNU General Public License v3.0")
                           )
                         )
 )
